@@ -125,6 +125,7 @@ bounty_leadgen_agent.py   # Streamlit entrypoint — UI, CSS, orchestration (760
 agent.py                  # Core logic — scoring, outreach, mock data (101 lines)
 test_agent.py             # 35 unit & integration tests (347 lines)
 requirements.txt          # Pinned dependencies (streamlit, pandas)
+README.md                 # Project entry point (this file complements the guide)
 BUILD_GUIDE.md            # This document
 ```
 
@@ -487,5 +488,6 @@ agent.py
 bounty_leadgen_agent.py
 test_agent.py
 requirements.txt
+README.md
 BUILD_GUIDE.md
 ```
