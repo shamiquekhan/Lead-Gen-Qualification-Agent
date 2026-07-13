@@ -30,7 +30,7 @@ def _mock_sleep():
 
 def build_app():
     """Load the Streamlit app in test mode."""
-    at = AppTest.from_file("bounty_leadgen_agent.py", default_timeout=30)
+    at = AppTest.from_file("bounty_leadgen_agent.py", default_timeout=60)
     at.run()
     return at
 

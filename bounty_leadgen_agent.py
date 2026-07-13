@@ -23,116 +23,116 @@ from agent import MOCK_COMPANIES, score_lead, draft_outreach
 st.set_page_config(page_title="Bounty — Verified Lead-Gen Agent", layout="wide")
 
 # ---------------------------------------------------------------------------
-# Organic / Biomorphic CSS — fluid blob shapes, nature-inspired palette,
-# wavy dividers, breathing motion, gooey effects.
-# Living Earth palette: Sage Green, Clay, Sand, Moss.
+# 3D Hyperrealism CSS — brushed titanium, carbon fiber, optical glass,
+# cinematic lighting, physics-based motion, CSS 3D transforms.
+# Palette: Gunmetal Grey, Silver, with cyan accent glows.
 # ---------------------------------------------------------------------------
 st.markdown("""
-<svg style="position:absolute;width:0;height:0;" aria-hidden="true">
-  <defs>
-    <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="goo" />
-      <feBlend in="SourceGraphic" in2="goo" />
-    </filter>
-  </defs>
-</svg>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap');
 
-    @keyframes blob-float {
-        0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translate(0, 0) scale(1); }
-        33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: translate(30px, -20px) scale(1.05); }
-        66% { border-radius: 70% 30% 50% 50% / 30% 50% 70% 40%; transform: translate(-20px, 10px) scale(0.95); }
+    /* ── Physics-based motion: spring overshoot ── */
+    @keyframes spring-up {
+        0% { transform: translateY(12px) scale(0.96); opacity: 0; }
+        50% { transform: translateY(-2px) scale(1.01); opacity: 1; }
+        70% { transform: translateY(1px) scale(0.995); }
+        100% { transform: translateY(0) scale(1); opacity: 1; }
     }
-    @keyframes blob-float-slow {
-        0%, 100% { border-radius: 50% 50% 40% 60% / 60% 40% 60% 40%; transform: translate(0, 0) scale(1); }
-        33% { border-radius: 40% 60% 60% 40% / 50% 60% 40% 50%; transform: translate(-25px, 15px) scale(1.03); }
-        66% { border-radius: 60% 40% 50% 50% / 40% 50% 60% 50%; transform: translate(20px, -15px) scale(0.97); }
+    @keyframes lens-flare {
+        0% { transform: translateX(-100%) rotate(-30deg); opacity: 0; }
+        20% { opacity: 0.6; }
+        60% { transform: translateX(100%) rotate(-30deg); opacity: 0.3; }
+        100% { transform: translateX(200%) rotate(-30deg); opacity: 0; }
     }
-    @keyframes wave-scroll {
-        0% { background-position-x: 0; }
-        100% { background-position-x: 200px; }
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
     }
-    @keyframes breathe {
-        0%, 100% { transform: scale(1); opacity: 0.4; }
-        50% { transform: scale(1.03); opacity: 0.6; }
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 6px rgba(0, 180, 216, 0.3), 0 0 20px rgba(0, 180, 216, 0.1); }
+        50% { box-shadow: 0 0 12px rgba(0, 180, 216, 0.5), 0 0 40px rgba(0, 180, 216, 0.2); }
     }
 
     :root {
-        --sage: #8FAB7A;
-        --sage-light: #B5CDA3;
-        --sage-dark: #6A8060;
-        --clay: #C17A4E;
-        --clay-light: #D49A6A;
-        --clay-dark: #A05E38;
-        --sand: #E8D5B7;
-        --sand-light: #F5EDDC;
-        --sand-dark: #D4BFA0;
-        --moss: #5C7A3E;
-        --moss-dark: #3D5228;
-        --bg-warm: #F2EBE1;
-        --text-primary: #2C2A1E;
-        --text-muted: #7A7568;
-        --text-on-dark: #F5F0E8;
-        --success: #6A9F6A;
-        --warning: #C9A04A;
-        --error: #C46060;
-        --radius-blob-1: 45% 55% 60% 40% / 55% 45% 55% 45%;
-        --radius-blob-2: 55% 45% 40% 60% / 45% 55% 45% 55%;
-        --radius-blob-3: 60% 40% 45% 55% / 40% 55% 60% 50%;
-        --shadow-organic: 0 8px 32px rgba(92, 122, 62, 0.12), 0 2px 8px rgba(92, 122, 62, 0.06);
-        --shadow-float: 0 12px 40px rgba(92, 122, 62, 0.15), 0 4px 12px rgba(92, 122, 62, 0.08);
-        --glow-sage: 0 0 0 0 rgba(143, 171, 122, 0);
+        --gunmetal: #2C2E33;
+        --gunmetal-light: #3D4045;
+        --gunmetal-dark: #1A1B1E;
+        --silver: #C0C2C5;
+        --silver-light: #D6D8DB;
+        --silver-dark: #8A8D91;
+        --titanium: #A0A3A8;
+        --carbon: #1E1F22;
+        --carbon-light: #2A2B30;
+        --cyan: #00B4D8;
+        --cyan-glow: #48CAE4;
+        --glass: rgba(255, 255, 255, 0.06);
+        --glass-edge: rgba(255, 255, 255, 0.1);
+        --bg-dark: #141518;
+        --text-primary: #E8E9EB;
+        --text-muted: #8A8D93;
+        --text-dim: #5C5F66;
+        --success: #2ECC71;
+        --success-bg: rgba(46, 204, 113, 0.1);
+        --warning: #F39C12;
+        --warning-bg: rgba(243, 156, 18, 0.1);
+        --error: #E74C3C;
+        --error-bg: rgba(231, 76, 60, 0.1);
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 16px;
+        --perspective: 1200px;
     }
 
+    /* ── Background: carbon fiber dark ── */
     html, body, #root, .stApp, .main > div {
-        background: var(--bg-warm) !important;
-        font-family: 'Quicksand', sans-serif !important;
+        background: var(--bg-dark) !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         color: var(--text-primary);
     }
-    .stApp { background: var(--bg-warm) !important; }
+    .stApp {
+        background: var(--bg-dark) !important;
+    }
+    .main {
+        perspective: var(--perspective);
+    }
 
-    /* ── Background blobs with gooey SVG filter ── */
+    /* ── Subtle carbon fiber texture overlay ── */
+    .stApp::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px),
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px);
+        pointer-events: none;
+        z-index: 9999;
+    }
+
+    /* ── Cinematic vignette ── */
     .main::before {
         content: '';
         position: fixed;
-        width: 400px;
-        height: 400px;
-        top: -80px;
-        right: -100px;
-        background: radial-gradient(circle, var(--sage-light) 0%, transparent 70%);
-        opacity: 0.35;
-        animation: blob-float 18s ease-in-out infinite, breathe 5s ease-in-out infinite;
-        filter: url(#goo);
+        inset: 0;
+        background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
         pointer-events: none;
         z-index: 0;
     }
-    .main::after {
-        content: '';
-        position: fixed;
-        width: 350px;
-        height: 350px;
-        bottom: -60px;
-        left: -80px;
-        background: radial-gradient(circle, var(--clay-light) 0%, transparent 70%);
-        opacity: 0.25;
-        animation: blob-float-slow 22s ease-in-out infinite, breathe 6s ease-in-out infinite;
-        filter: url(#goo);
-        pointer-events: none;
-        z-index: 0;
-    }
+
+    /* ── Lens flare highlight (fixed position sweep) ── */
     .stApp::before {
         content: '';
         position: fixed;
-        width: 250px;
-        height: 250px;
-        top: 40%;
-        left: -60px;
-        background: radial-gradient(circle, var(--sand) 0%, transparent 65%);
-        opacity: 0.3;
-        animation: blob-float 25s ease-in-out infinite, breathe 7s ease-in-out infinite;
-        filter: url(#goo);
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent 30%,
+            rgba(0, 180, 216, 0.02) 40%,
+            rgba(255, 255, 255, 0.04) 45%,
+            rgba(0, 180, 216, 0.02) 50%,
+            transparent 60%
+        );
+        animation: lens-flare 12s ease-in-out infinite;
         pointer-events: none;
         z-index: 0;
     }
@@ -140,365 +140,438 @@ st.markdown("""
     /* ── Typography ── */
     h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stText,
     .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-        font-family: 'Quicksand', sans-serif !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         color: var(--text-primary);
         line-height: 1.6;
     }
     h1 {
         font-size: 2rem !important;
         font-weight: 700 !important;
-        letter-spacing: -0.02em;
-        color: var(--moss-dark) !important;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--silver-light) !important;
         margin-bottom: 0.25rem !important;
         position: relative;
         z-index: 1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 0 40px rgba(0, 180, 216, 0.08);
     }
-    h2, .stSubheader { font-size: 1.2rem !important; font-weight: 600 !important; color: var(--text-primary) !important; margin-top: 0.5rem !important; }
-    p, .stMarkdown p { font-size: 0.95rem !important; line-height: 1.7 !important; color: var(--text-primary) !important; }
+    h2, .stSubheader { font-size: 1.15rem !important; font-weight: 600 !important; color: var(--silver) !important; margin-top: 0.5rem !important; letter-spacing: 0.02em; }
+    p, .stMarkdown p { font-size: 0.92rem !important; line-height: 1.7 !important; color: var(--text-primary) !important; }
 
-    /* ── Step headers ── */
+    /* ── Step headers: titanium badge ── */
     .step-header {
         display: inline-block;
-        background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
-        border-radius: var(--radius-blob-2);
-        padding: 0.7rem 1.4rem;
+        background: linear-gradient(135deg, var(--gunmetal-light) 0%, var(--gunmetal) 100%);
+        border-radius: var(--radius-sm);
+        padding: 0.6rem 1.3rem;
         margin: 1.5rem 0 1rem 0;
-        font-family: 'Quicksand', sans-serif !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        color: var(--text-on-dark) !important;
-        box-shadow: var(--shadow-organic);
-        transition: border-radius 0.5s ease, transform 0.3s ease;
+        font-size: 1.05rem !important;
+        letter-spacing: 0.03em;
+        color: var(--silver-light) !important;
+        box-shadow:
+            0 2px 4px rgba(0,0,0,0.3),
+            0 4px 12px rgba(0,0,0,0.15),
+            inset 0 1px 0 rgba(255,255,255,0.08);
+        border: 1px solid var(--glass-edge);
         position: relative;
         z-index: 1;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+        animation: spring-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
     .step-header:hover {
-        border-radius: var(--radius-blob-3);
-        transform: scale(1.02);
-        box-shadow: var(--shadow-float);
+        transform: translateY(-1px) scale(1.02);
+        box-shadow:
+            0 4px 8px rgba(0,0,0,0.4),
+            0 8px 24px rgba(0,0,0,0.2),
+            inset 0 1px 0 rgba(255,255,255,0.12),
+            0 0 20px rgba(0, 180, 216, 0.06);
+        border-color: rgba(0, 180, 216, 0.2);
     }
 
-    /* ── Wavy dividers (no straight lines) ── */
+    /* ── Dividers: etched line ── */
     hr, .stDivider {
         border: none !important;
-        height: 24px !important;
-        background: transparent !important;
-        position: relative;
+        height: 1px !important;
+        background: linear-gradient(90deg, transparent, var(--glass-edge), transparent) !important;
         margin: 1.5rem 0 !important;
-        overflow: visible !important;
-    }
-    hr::before, .stDivider::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 24px;
-        background: url("data:image/svg+xml,%3Csvg width='200' height='24' viewBox='0 0 200 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,12 Q25,0 50,12 T100,12 T150,12 T200,12' stroke='%238FAB7A' stroke-width='2' fill='none' opacity='0.5'/%3E%3C/svg%3E") repeat-x;
-        background-size: 200px 24px;
-        animation: wave-scroll 8s linear infinite;
+        position: relative;
     }
 
-    /* ── Organic card (no straight-line borders) ── */
-    .bio-card {
-        background: rgba(245, 237, 220, 0.7);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-radius: var(--radius-blob-1);
+    /* ── Glass card ── */
+    .glass-card {
+        background: var(--glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: var(--radius-md);
         padding: 1.5rem;
         margin-bottom: 1.5rem;
-        box-shadow: var(--shadow-organic), 0 0 0 1px rgba(143, 171, 122, 0.12);
-        transition: all 0.4s ease;
+        border: 1px solid var(--glass-edge);
+        box-shadow:
+            0 4px 16px rgba(0,0,0,0.2),
+            0 1px 4px rgba(0,0,0,0.15),
+            inset 0 1px 0 rgba(255,255,255,0.06);
         position: relative;
         z-index: 1;
+        transform: translateZ(0);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
     }
-    .bio-card:hover {
-        box-shadow: var(--shadow-float), 0 0 0 1px rgba(143, 171, 122, 0.2);
-        border-radius: var(--radius-blob-2);
+    .glass-card:hover {
+        transform: translateZ(4px);
+        box-shadow:
+            0 8px 32px rgba(0,0,0,0.3),
+            0 2px 8px rgba(0,0,0,0.2),
+            inset 0 1px 0 rgba(255,255,255,0.08);
     }
 
     /* ── Widget Labels ── */
     .stSelectbox label, .stSlider label, .stTextInput label,
     .stNumberInput label, p, .stMarkdown p {
-        font-size: 0.88rem !important;
-        font-weight: 600 !important;
-        color: var(--text-primary) !important;
+        font-size: 0.82rem !important;
+        font-weight: 500 !important;
+        color: var(--silver) !important;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         margin-bottom: 0.4rem !important;
     }
 
-    /* ── Buttons (shadow edge, not border) ── */
+    /* ── Buttons: brushed titanium ── */
     div.stButton > button {
-        font-family: 'Quicksand', sans-serif !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         font-weight: 600 !important;
-        font-size: 1rem !important;
-        background: linear-gradient(135deg, var(--sand-light) 0%, var(--sand) 100%) !important;
-        color: var(--moss-dark) !important;
-        border: none !important;
-        border-radius: var(--radius-blob-1) !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, var(--gunmetal-light) 0%, var(--gunmetal) 100%) !important;
+        color: var(--silver-light) !important;
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-sm) !important;
         padding: 0.75rem 2.5rem !important;
-        box-shadow: var(--shadow-organic), 0 0 0 1px rgba(143, 171, 122, 0.15) !important;
-        transition: all 0.3s ease !important;
+        box-shadow:
+            0 2px 4px rgba(0,0,0,0.3),
+            0 4px 12px rgba(0,0,0,0.15),
+            inset 0 1px 0 rgba(255,255,255,0.08) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         cursor: pointer !important;
-        min-height: 3.2rem;
+        min-height: 3rem;
         min-width: 10rem;
         position: relative;
         z-index: 1;
+        overflow: hidden;
+    }
+    div.stButton > button::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+        background-size: 200% 100%;
+        animation: shimmer 4s ease-in-out infinite;
+        pointer-events: none;
     }
     div.stButton > button:hover {
-        border-radius: var(--radius-blob-2) !important;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-float), 0 0 0 1px rgba(143, 171, 122, 0.25) !important;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow:
+            0 4px 12px rgba(0,0,0,0.4),
+            0 8px 24px rgba(0,0,0,0.2),
+            inset 0 1px 0 rgba(255,255,255,0.12),
+            0 0 16px rgba(0, 180, 216, 0.06) !important;
+        border-color: rgba(0, 180, 216, 0.25) !important;
+        color: var(--cyan-glow) !important;
     }
     div.stButton > button:active {
-        transform: translateY(1px) scale(0.98);
-        border-radius: var(--radius-blob-3) !important;
+        transform: translateY(0) scale(0.98);
+        box-shadow:
+            0 1px 2px rgba(0,0,0,0.3),
+            inset 0 2px 8px rgba(0,0,0,0.2) !important;
     }
+    /* Primary button variant: cyan accent */
     div.stButton > button[kind="primary"],
     div.stButton > button[kind="primaryFormSubmit"] {
-        background: linear-gradient(135deg, var(--moss) 0%, var(--sage-dark) 100%) !important;
-        color: var(--text-on-dark) !important;
-        box-shadow: var(--shadow-organic) !important;
+        background: linear-gradient(135deg, #005A7A 0%, #003D52 100%) !important;
+        color: var(--cyan-glow) !important;
+        border-color: rgba(0, 180, 216, 0.3) !important;
+        box-shadow:
+            0 2px 4px rgba(0,0,0,0.3),
+            0 4px 12px rgba(0, 180, 216, 0.1),
+            inset 0 1px 0 rgba(255,255,255,0.08) !important;
+        animation: pulse-glow 3s ease-in-out infinite;
     }
     div.stButton > button[kind="primary"]:hover,
     div.stButton > button[kind="primaryFormSubmit"]:hover {
-        background: linear-gradient(135deg, var(--sage) 0%, var(--moss) 100%) !important;
+        background: linear-gradient(135deg, #007096 0%, #005A7A 100%) !important;
+        box-shadow:
+            0 4px 12px rgba(0,0,0,0.4),
+            0 8px 24px rgba(0, 180, 216, 0.15),
+            inset 0 1px 0 rgba(255,255,255,0.1) !important;
     }
     div.stButton > button[kind="primary"]:active,
     div.stButton > button[kind="primaryFormSubmit"]:active {
-        background: linear-gradient(135deg, var(--moss-dark) 0%, var(--sage-dark) 100%) !important;
+        background: linear-gradient(135deg, #002A3A 0%, #001A26 100%) !important;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.3) !important;
     }
 
-    /* ── Inputs (organic edges via shadows, not border lines) ── */
-    div[data-testid="stSelectbox"] > div > div,
+    /* ── Selectbox: carbon fiber inset ── */
+    div[data-testid="stSelectbox"] > div > div {
+        background: var(--carbon) !important;
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 0.25rem 0.75rem !important;
+        transition: all 0.2s ease !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.04) !important;
+    }
+    div[data-testid="stSelectbox"] > div > div:focus-within {
+        border-color: var(--cyan) !important;
+        box-shadow:
+            inset 0 2px 4px rgba(0,0,0,0.3),
+            0 0 0 2px rgba(0, 180, 216, 0.15) !important;
+    }
+    div[data-testid="stSelectbox"] select {
+        background: transparent !important;
+        color: var(--text-primary) !important;
+        font-family: 'Chakra Petch', sans-serif !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* ── Text / Number Input: carbon fiber inset ── */
     div[data-testid="stTextInput"] > div > div,
     div[data-testid="stNumberInput"] > div > div {
-        background: rgba(245, 237, 220, 0.7) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        border: none !important;
-        border-radius: var(--radius-blob-2) !important;
-        padding: 0.25rem 0.75rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: inset 0 2px 6px rgba(92, 122, 62, 0.06), 0 0 0 1px rgba(143, 171, 122, 0.15) !important;
+        background: var(--carbon) !important;
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-sm) !important;
+        transition: all 0.2s ease !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.04) !important;
     }
-    div[data-testid="stSelectbox"] > div > div:focus-within,
     div[data-testid="stTextInput"] > div > div:focus-within,
     div[data-testid="stNumberInput"] > div > div:focus-within {
-        box-shadow: 0 0 0 3px rgba(143, 171, 122, 0.15), 0 0 0 1px var(--sage) !important;
-        border-radius: var(--radius-blob-3) !important;
+        border-color: var(--cyan) !important;
+        box-shadow:
+            inset 0 2px 4px rgba(0,0,0,0.3),
+            0 0 0 2px rgba(0, 180, 216, 0.15) !important;
     }
-    div[data-testid="stSelectbox"] select,
     div[data-testid="stTextInput"] input,
     div[data-testid="stNumberInput"] input {
         background: transparent !important;
         color: var(--text-primary) !important;
-        font-family: 'Quicksand', sans-serif !important;
-        font-size: 0.9rem !important;
+        font-family: 'Chakra Petch', sans-serif !important;
+        font-size: 0.85rem !important;
         border: none !important;
         box-shadow: none !important;
     }
     div[data-testid="stNumberInput"] button {
-        background: rgba(245, 237, 220, 0.7) !important;
-        border: none !important;
-        border-radius: 50% !important;
-        color: var(--moss) !important;
+        background: var(--gunmetal) !important;
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--silver) !important;
         min-width: 2rem !important;
         min-height: 2rem !important;
         transition: all 0.15s ease !important;
-        box-shadow: var(--shadow-organic) !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06) !important;
     }
     div[data-testid="stNumberInput"] button:active {
-        transform: scale(0.9);
-        background: var(--sand) !important;
+        transform: scale(0.92);
+        background: var(--gunmetal-dark) !important;
     }
 
     /* ── Slider ── */
     div[data-testid="stSlider"] { padding: 0.75rem 0.25rem !important; }
     div[data-testid="stSlider"] > div {
-        background: rgba(245, 237, 220, 0.7) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        border: none !important;
-        border-radius: var(--radius-blob-2) !important;
+        background: var(--carbon) !important;
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-sm) !important;
         padding: 0.75rem 1rem 0.25rem !important;
-        box-shadow: inset 0 2px 6px rgba(92, 122, 62, 0.06), 0 0 0 1px rgba(143, 171, 122, 0.12) !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important;
     }
     div[data-testid="stSlider"] div[role="slider"] {
-        background: var(--sage) !important;
-        border: 3px solid var(--sand-light) !important;
-        box-shadow: var(--shadow-organic) !important;
-        transition: all 0.2s ease !important;
-        width: 22px !important; height: 22px !important;
+        background: linear-gradient(135deg, var(--cyan) 0%, #0096B4 100%) !important;
+        border: 2px solid var(--bg-dark) !important;
+        box-shadow: 0 0 8px rgba(0, 180, 216, 0.3), 0 2px 4px rgba(0,0,0,0.3) !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        width: 20px !important; height: 20px !important;
     }
     div[data-testid="stSlider"] div[role="slider"]:active {
-        transform: scale(0.9);
-        box-shadow: var(--shadow-float) !important;
-        background: var(--sage-dark) !important;
+        transform: scale(1.2);
+        box-shadow: 0 0 16px rgba(0, 180, 216, 0.5), 0 2px 8px rgba(0,0,0,0.3) !important;
     }
 
-    /* ── Dataframe (organic edges) ── */
+    /* ── Dataframe: glass table ── */
     div[data-testid="stDataFrame"] {
-        border-radius: var(--radius-blob-2) !important;
+        border-radius: var(--radius-md) !important;
         overflow: hidden !important;
-        box-shadow: var(--shadow-organic), 0 0 0 1px rgba(143, 171, 122, 0.12) !important;
-        background: rgba(245, 237, 220, 0.6) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        padding: 0.25rem !important;
+        box-shadow:
+            0 4px 16px rgba(0,0,0,0.2),
+            0 1px 4px rgba(0,0,0,0.15),
+            inset 0 1px 0 rgba(255,255,255,0.04) !important;
+        background: var(--glass) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--glass-edge) !important;
     }
     div[data-testid="stDataFrame"] table {
-        font-family: 'Quicksand', sans-serif !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         border-collapse: separate !important;
         border-spacing: 0 !important;
     }
     div[data-testid="stDataFrame"] thead tr th {
-        background: var(--sage) !important;
-        color: var(--text-on-dark) !important;
+        background: var(--gunmetal) !important;
+        color: var(--silver-light) !important;
         font-weight: 600 !important;
-        font-size: 0.8rem !important;
-        padding: 0.75rem 0.6rem !important;
-        border: none !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.7rem 0.6rem !important;
+        border-bottom: 1px solid var(--glass-edge) !important;
     }
-    div[data-testid="stDataFrame"] thead tr th:first-child { border-radius: 20px 0 0 0; }
-    div[data-testid="stDataFrame"] thead tr th:last-child { border-radius: 0 20px 0 0; }
     div[data-testid="stDataFrame"] tbody tr td {
-        background: rgba(245, 237, 220, 0.3) !important;
+        background: transparent !important;
         color: var(--text-primary) !important;
-        font-size: 0.85rem !important;
-        padding: 0.6rem !important;
-        box-shadow: inset 0 -1px 0 rgba(143, 171, 122, 0.08) !important;
-        border: none !important;
+        font-size: 0.82rem !important;
+        padding: 0.55rem 0.6rem !important;
+        border-bottom: 1px solid rgba(255,255,255,0.03) !important;
     }
-    div[data-testid="stDataFrame"] tbody tr:last-child td:first-child { border-radius: 0 0 0 20px; }
-    div[data-testid="stDataFrame"] tbody tr:last-child td:last-child { border-radius: 0 0 20px 0; }
     div[data-testid="stDataFrame"] tbody tr:hover td {
-        background: rgba(143, 171, 122, 0.08) !important;
+        background: rgba(0, 180, 216, 0.04) !important;
         cursor: default !important;
     }
 
-    /* ── Expander (organic edges) ── */
+    /* ── Expander: glass panel ── */
     div[data-testid="stExpander"] {
-        border: none !important;
-        border-radius: var(--radius-blob-1) !important;
-        background: rgba(245, 237, 220, 0.7) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        box-shadow: var(--shadow-organic), 0 0 0 1px rgba(143, 171, 122, 0.12) !important;
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--glass) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow:
+            0 4px 16px rgba(0,0,0,0.15),
+            0 1px 4px rgba(0,0,0,0.1),
+            inset 0 1px 0 rgba(255,255,255,0.04) !important;
         margin-bottom: 1rem !important;
         overflow: hidden !important;
-        transition: all 0.4s ease !important;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         position: relative;
         z-index: 1;
     }
     div[data-testid="stExpander"]:hover {
-        box-shadow: var(--shadow-float) !important;
-        border-radius: var(--radius-blob-2) !important;
+        box-shadow:
+            0 8px 32px rgba(0,0,0,0.25),
+            0 2px 8px rgba(0,0,0,0.15),
+            inset 0 1px 0 rgba(255,255,255,0.06),
+            0 0 16px rgba(0, 180, 216, 0.03) !important;
+        border-color: rgba(0, 180, 216, 0.15);
     }
     div[data-testid="stExpander"] summary {
-        font-family: 'Quicksand', sans-serif !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        color: var(--moss-dark) !important;
-        padding: 0.85rem 1.2rem !important;
-        border-radius: var(--radius-blob-1) !important;
+        font-size: 0.9rem !important;
+        letter-spacing: 0.02em;
+        color: var(--silver-light) !important;
+        padding: 0.8rem 1.1rem !important;
+        border-radius: var(--radius-md) !important;
         cursor: pointer !important;
         transition: all 0.2s ease !important;
         user-select: none !important;
     }
-    div[data-testid="stExpander"] summary:hover { background: rgba(143, 171, 122, 0.06) !important; }
+    div[data-testid="stExpander"] summary:hover { background: rgba(255,255,255,0.03) !important; }
     div[data-testid="stExpander"] div[data-testid="stExpanderContent"] {
-        background: rgba(245, 237, 220, 0.4) !important;
-        border-radius: 0 0 var(--radius-blob-1) var(--radius-blob-1) !important;
-        padding: 0.5rem 1.25rem 1.25rem !important;
-        box-shadow: inset 0 4px 12px rgba(92, 122, 62, 0.04) !important;
+        background: rgba(0,0,0,0.15) !important;
+        border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
+        padding: 0.5rem 1.1rem 1.1rem !important;
+        box-shadow: inset 0 4px 12px rgba(0,0,0,0.1) !important;
     }
 
-    /* ── Alerts (organic, no borders) ── */
+    /* ── Alerts ── */
     div[data-testid="stAlertContainer"] {
         border: none !important;
         padding: 0 !important;
-        font-family: 'Quicksand', sans-serif !important;
+        font-family: 'Chakra Petch', sans-serif !important;
         margin-bottom: 1rem !important;
     }
     div[data-testid="stAlertContainer"] > div {
-        border: none !important;
-        border-radius: var(--radius-blob-2) !important;
-        padding: 1rem 1.25rem !important;
-        font-family: 'Quicksand', sans-serif !important;
-        font-size: 0.9rem !important;
-        background: rgba(245, 237, 220, 0.7) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 0.9rem 1.1rem !important;
+        font-family: 'Chakra Petch', sans-serif !important;
+        font-size: 0.85rem !important;
+        background: var(--glass) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
     div[data-testid="stAlertContainer"] .stAlert {
-        background: rgba(106, 159, 106, 0.12) !important;
-        box-shadow: 0 0 0 1px rgba(106, 159, 106, 0.2) !important;
-        border-radius: var(--radius-blob-2) !important;
+        background: var(--success-bg) !important;
+        border-color: rgba(46, 204, 113, 0.25) !important;
+        box-shadow: 0 0 12px rgba(46, 204, 113, 0.06) !important;
     }
     div[data-testid="stAlertContainer"] .st-bd {
-        background: rgba(196, 96, 96, 0.12) !important;
-        box-shadow: 0 0 0 1px rgba(196, 96, 96, 0.2) !important;
-        border-radius: var(--radius-blob-2) !important;
+        background: var(--error-bg) !important;
+        border-color: rgba(231, 76, 60, 0.25) !important;
     }
     div[data-testid="stAlertContainer"] .st-cb {
-        background: rgba(201, 160, 74, 0.12) !important;
-        box-shadow: 0 0 0 1px rgba(201, 160, 74, 0.2) !important;
-        border-radius: var(--radius-blob-2) !important;
+        background: var(--warning-bg) !important;
+        border-color: rgba(243, 156, 18, 0.25) !important;
     }
     div[data-testid="stAlertContainer"] .st-cs {
-        background: rgba(143, 171, 122, 0.12) !important;
-        box-shadow: 0 0 0 1px rgba(143, 171, 122, 0.2) !important;
-        border-radius: var(--radius-blob-2) !important;
+        background: rgba(0, 180, 216, 0.08) !important;
+        border-color: rgba(0, 180, 216, 0.2) !important;
     }
     div[data-testid="stAlertContainer"] .stMarkdown p { color: var(--text-primary) !important; font-weight: 500 !important; }
 
     /* ── Spinner ── */
     div.stSpinner {
-        border-radius: var(--radius-blob-2) !important;
+        border-radius: var(--radius-md) !important;
         padding: 1.5rem !important;
-        background: rgba(245, 237, 220, 0.7) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        box-shadow: var(--shadow-organic), 0 0 0 1px rgba(143, 171, 122, 0.08) !important;
+        background: var(--glass) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--glass-edge) !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
     }
-    div.stSpinner > div { border-top-color: var(--sage) !important; border-width: 3px !important; }
+    div.stSpinner > div { border-top-color: var(--cyan) !important; border-width: 2px !important; }
+
+    /* ── Code blocks (dark glass) ── */
+    .stCodeBlock {
+        border-radius: var(--radius-sm) !important;
+        background: var(--carbon) !important;
+        border: 1px solid var(--glass-edge) !important;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+        padding: 0.25rem !important;
+    }
+    .stCodeBlock code { background: transparent !important; color: var(--cyan-glow) !important; font-size: 0.82rem !important; }
 
     /* ── Caption ── */
     .stCaption, .stMarkdown small, .stMarkdown .caption {
-        color: var(--text-muted) !important;
-        font-size: 0.82rem !important;
-        font-weight: 500 !important;
-        line-height: 1.5 !important;
+        color: var(--text-dim) !important;
+        font-size: 0.78rem !important;
+        font-weight: 400 !important;
+        letter-spacing: 0.02em;
     }
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg-warm); border-radius: 8px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
     ::-webkit-scrollbar-thumb {
-        background: var(--sage-light);
-        border-radius: 8px;
-        border: 2px solid var(--bg-warm);
+        background: var(--gunmetal-light);
+        border-radius: 3px;
     }
-    ::-webkit-scrollbar-thumb:hover { background: var(--sage); }
-
-    /* ── Code blocks ── */
-    .stCodeBlock {
-        border-radius: var(--radius-blob-2) !important;
-        background: rgba(44, 42, 30, 0.04) !important;
-        box-shadow: inset 0 2px 8px rgba(92, 122, 62, 0.06), 0 0 0 1px rgba(143, 171, 122, 0.08) !important;
-        padding: 0.25rem !important;
-    }
-    .stCodeBlock code { background: transparent !important; color: var(--moss-dark) !important; font-size: 0.85rem !important; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--silver-dark); }
 
     /* ── Tooltip ── */
-    div[data-testid="stTooltipIcon"] { color: var(--text-muted) !important; opacity: 0.6; transition: opacity 0.2s ease; }
-    div[data-testid="stTooltipIcon"]:hover { opacity: 0.9; }
+    div[data-testid="stTooltipIcon"] { color: var(--text-dim) !important; opacity: 0.5; transition: opacity 0.2s ease; }
+    div[data-testid="stTooltipIcon"]:hover { opacity: 0.8; }
 
     /* ── Info callout ── */
     .stAlertContainer .stAlert {
-        background: rgba(245, 237, 220, 0.7) !important;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        box-shadow: 0 0 0 1px rgba(143, 171, 122, 0.15) !important;
-        border-radius: var(--radius-blob-2) !important;
+        background: var(--glass) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--glass-edge) !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+        border-radius: var(--radius-sm) !important;
+    }
+
+    /* ── 3D card hover effect on data containers ── */
+    div[data-testid="stVerticalBlock"] > div {
+        transform-style: preserve-3d;
+        transition: transform 0.3s ease;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -509,7 +582,7 @@ st.markdown("""
 # ---------------------------------------------------------------------------
 st.title("Verified Lead-Gen & Qualification Agent")
 st.markdown(
-    '<p style="color: var(--neu-text-muted); font-size: 0.95rem; margin-top: -0.5rem; '
+    '<p style="color: var(--text-muted); font-size: 0.95rem; margin-top: -0.5rem; '
     'font-weight: 400;">'
     'A bounty for <strong>5 qualified leads</strong> only pays out on a verified outcome — '
     'not on an agent\'s claim. This demo shows the full loop: '
@@ -576,7 +649,7 @@ if run:
         time.sleep(0.6)
     st.markdown(
         f'Scanned **{len(MOCK_COMPANIES)}** candidate companies.\n\n'
-        f'<div style="font-size: 0.85rem; color: var(--neu-text-muted); margin-top: 0.25rem;">'
+        f'<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">'
         f'Source: In-memory mock pool — replace with real prospecting API in production.</div>',
         unsafe_allow_html=True,
     )
@@ -607,7 +680,7 @@ if run:
     ])
     st.dataframe(score_table, use_container_width=True, hide_index=True)
     st.markdown(
-        '<div style="font-size: 0.8rem; color: var(--neu-text-muted); text-align: right; '
+        '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: right; '
         'padding: 0.25rem 0.5rem;">'
         'All 12 candidates shown, sorted by confidence — rejected candidates are visible too.'
         '</div>',
@@ -638,14 +711,14 @@ if run:
             with colA:
                 st.markdown(
                     '<p style="font-weight: 600; margin-bottom: 0.5rem; '
-                    'color: var(--neu-text);">Outreach draft</p>',
+                    'color: var(--text-primary);">Outreach draft</p>',
                     unsafe_allow_html=True,
                 )
                 st.code(draft_outreach(company), language=None)
             with colB:
                 st.markdown(
                     '<p style="font-weight: 600; margin-bottom: 0.5rem; '
-                    'color: var(--neu-text);">Evidence package (oracle input)</p>',
+                    'color: var(--text-primary);">Evidence package (oracle input)</p>',
                     unsafe_allow_html=True,
                 )
                 for field, (ok, val) in checks.items():
@@ -653,18 +726,18 @@ if run:
                     st.markdown(
                         f'<div style="display: flex; align-items: center; gap: 0.5rem; '
                         f'padding: 0.25rem 0;">'
-                        f'<span style="font-size: 0.8rem; font-weight: 600; color: {"var(--neu-success)" if ok else "var(--neu-error)"};">{icon}</span>'
-                        f'<code style="background: transparent; color: var(--neu-text); font-size: 0.85rem;">'
+                        f'<span style="font-size: 0.8rem; font-weight: 600; color: {"var(--success)" if ok else "var(--error)"};">{icon}</span>'
+                        f'<code style="background: transparent; color: var(--text-primary); font-size: 0.85rem;">'
                         f'{field}: {val}</code>'
                         f'</div>',
                         unsafe_allow_html=True,
                     )
                 st.markdown(
                     f'<div style="display: flex; align-items: center; gap: 0.5rem; '
-                    f'padding-top: 0.5rem; border-top: 1px solid var(--neu-shadow-dark); '
+                    f'padding-top: 0.5rem; border-top: 1px solid var(--glass-edge); '
                     f'margin-top: 0.5rem;">'
-                    f'<span style="font-size: 0.8rem; font-weight: 600; color: var(--neu-text-muted);">Source:</span>'
-                    f'<code style="background: transparent; color: var(--neu-text); font-size: 0.85rem;">'
+                    f'<span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Source:</span>'
+                    f'<code style="background: transparent; color: var(--text-primary); font-size: 0.85rem;">'
                     f'{company["source"]}</code>'
                     f'</div>',
                     unsafe_allow_html=True,
@@ -692,17 +765,17 @@ if run:
 
     # Verdict footnotes
     st.markdown(
-        '<div style="margin-top: 1rem; padding: 1rem; border-radius: var(--neu-radius-sm); '
-        'background: var(--neu-card); '
-        'box-shadow: inset 3px 3px 8px var(--neu-shadow-dark), '
-        'inset -3px -3px 8px var(--neu-shadow-light);">'
-        '<p style="color: var(--neu-text-muted); font-size: 0.85rem; margin: 0;">'
+        '<div style="margin-top: 1rem; padding: 1rem; border-radius: var(--radius-sm); '
+        'background: var(--glass); backdrop-filter: blur(8px); '
+        'border: 1px solid var(--glass-edge); '
+        'box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 1px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04);">'
+        '<p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">'
         'This is the piece most lead-gen agents skip: the claim and the check are the same step, '
         'so there\'s nothing for a buyer or an oracle to independently verify. Here they\'re separated — '
         'the scoring table and evidence package exist whether or not the shortlist passes.'
         '</p>'
-        '<p style="color: var(--neu-text-muted); font-size: 0.8rem; margin: 0.5rem 0 0; '
-        'border-top: 1px solid var(--neu-shadow-dark); padding-top: 0.5rem;">'
+        '<p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.5rem 0 0; '
+        'border-top: 1px solid var(--glass-edge); padding-top: 0.5rem;">'
         'Note: In this demo the verifier still relies on the scorer\'s output rather than '
         're-deriving from raw evidence independently. A real production oracle would run as a '
         'separate service with its own data access path — see Section 15 of the build guide.'
