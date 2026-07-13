@@ -18,6 +18,8 @@ import time
 import pandas as pd
 import streamlit as st
 
+from agent import MOCK_COMPANIES, score_lead, draft_outreach
+
 st.set_page_config(page_title="Bounty — Verified Lead-Gen Agent", layout="wide")
 
 # ---------------------------------------------------------------------------
@@ -545,8 +547,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-from agent import MOCK_COMPANIES, score_lead, draft_outreach
 
 
 # ---------------------------------------------------------------------------
