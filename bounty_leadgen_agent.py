@@ -472,6 +472,11 @@ st.markdown("""
         user-select: none !important;
     }
     div[data-testid="stExpander"] summary:hover { background: rgba(255,255,255,0.03) !important; }
+    /* Restore Streamlit's Material Symbols icon font for the expander arrow, */
+    /* which was being intercepted by the `!important` on summary above.      */
+    div[data-testid="stExpander"] span[data-testid="stExpanderIcon"] {
+        font-family: 'Material Symbols Rounded' !important;
+    }
     div[data-testid="stExpander"] div[data-testid="stExpanderContent"] {
         background: rgba(0,0,0,0.15) !important;
         border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
