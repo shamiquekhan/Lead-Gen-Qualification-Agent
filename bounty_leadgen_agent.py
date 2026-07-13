@@ -716,7 +716,7 @@ if run:
                 )
 
     # --- Step 5: Verifier verdict ---
-    # ⚠️  Honest gap: the verdict re-uses the same `qualified` list scoring produced,
+    # Honest gap: the verdict re-uses the same `qualified` list scoring produced,
     # rather than re-deriving from raw evidence independently. A real oracle would
     # run as a separate service with its own data access path — see Section 15.
     st.markdown(
