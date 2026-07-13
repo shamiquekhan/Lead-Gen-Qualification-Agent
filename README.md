@@ -28,7 +28,7 @@ python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
 # Install dependencies
-pip install streamlit pandas
+pip install streamlit pandas pytest
 
 # Run the app
 streamlit run bounty_leadgen_agent.py
