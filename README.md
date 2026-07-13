@@ -48,14 +48,15 @@ All 35 tests should pass.
 
 ```
 agent.py                  # Core logic — scoring, outreach, mock data (101 lines)
-bounty_leadgen_agent.py   # Streamlit entrypoint — UI, neumorphism CSS, orchestration (760 lines)
-test_agent.py             # 35 unit & integration tests (347 lines)
-requirements.txt          # Pinned dependencies (streamlit==1.59.2, pandas==3.0.3)
-BUILD_GUIDE.md            # Full build documentation (this is the primary reference)
+bounty_leadgen_agent.py   # Streamlit entrypoint — UI, 3D Hyperrealism CSS, orchestration
+test_agent.py             # 35 unit & integration tests for agent.py
+test_ui.py                # 31 Streamlit UI tests using AppTest
+requirements.txt          # Pinned dependencies (streamlit, pandas, pytest)
+documentation.md          # Full documentation (this is the primary reference)
 README.md                 # This file
 ```
 
-**Why two files?** `agent.py` contains only pure functions (`score_lead`, `draft_outreach`) and the mock data (`MOCK_COMPANIES`) — no Streamlit or IO dependencies. This makes it importable and testable in a standard `pytest` run without a Streamlit runtime. The UI layer lives in `bounty_leadgen_agent.py`, which adds ~500 lines of inlined neumorphism CSS for the visual design.
+**Why two files?** `agent.py` contains only pure functions (`score_lead`, `draft_outreach`) and the mock data (`MOCK_COMPANIES`) — no Streamlit or IO dependencies. This makes it importable and testable in a standard `pytest` run without a Streamlit runtime. The UI layer lives in `bounty_leadgen_agent.py`, which adds ~500 lines of inlined 3D Hyperrealism CSS (brushed titanium, carbon fiber, optical glass) for the visual design.
 
 ## How It Works
 
@@ -92,20 +93,20 @@ This is what makes the outcome auditable — a buyer can confirm each claim with
 
 ### Honest gap
 
-The current "verifier" re-uses the same `qualified` list that scoring produced, rather than re-deriving from raw evidence independently. A real production oracle would run as a **separate service** with its own data access path. See the [BUILD_GUIDE](BUILD_GUIDE.md) for the full discussion (Section 15).
+The current "verifier" re-uses the same `qualified` list that scoring produced, rather than re-deriving from raw evidence independently. A real production oracle would run as a **separate service** with its own data access path. See the [Documentation](documentation.md) for the full discussion (Section 15).
 
 ## Technology Stack
 
 | Technology | Why |
 |---|---|
 | **Python** | Fastest path to a working demo; ecosystem fit for future ML scoring |
-| **Streamlit** + 500 lines of neumorphism CSS | Zero front-end setup, polished visual design (embossed cards, inset inputs, pill buttons) |
+| **Streamlit** + 500 lines of 3D Hyperrealism CSS | Zero front-end setup, polished visual design (brushed titanium, carbon fiber, optical glass, cinematic lighting) |
 | **Pandas** | Clean tabular rendering of the scoring table |
 | **Mock data** (12 dicts) | Deterministic, offline, zero API keys needed — swap for a real prospecting API later |
 
-## Build Guide
+## Documentation
 
-The **[BUILD_GUIDE.md](BUILD_GUIDE.md)** is the primary documentation — 27 sections covering everything from product philosophy to production upgrade paths, security, testing strategy, and a full FAQ. This README is just the entry point.
+The **[Documentation](documentation.md)** is the primary reference — 27 sections covering everything from product philosophy to production upgrade paths, security, testing strategy, and a full FAQ. This README is just the entry point.
 
 ## Author
 

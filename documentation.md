@@ -1,15 +1,16 @@
-# BUILD_GUIDE.md
+# Documentation
 
 **Project:** Verified Lead Generation & Verification Agent
 **Subtitle:** Reference implementation of an outcome-based AI marketplace agent, built to demonstrate Bounty's (trybounty.ai) "pay for verified outcomes, not AI outputs" model.
 **Author:** Shamique Khan
-**Version:** 1.0
-**Date:** 2026-07-13
-**Status:** Demo-grade, two-file Streamlit implementation (domain logic extracted into `agent.py` for independent testability). Production upgrade path in Section 19.
+**Version:** 2.0
+**Date:** 2026-07-14
+**Status:** Demo-grade, three-module Streamlit implementation (domain logic in `agent.py`, UI/orchestration in `bounty_leadgen_agent.py`, tests in `test_agent.py` + `test_ui.py`). Production upgrade path in Section 19.
 
 | Version | Date | Change |
 |---|---|---|
-| 1.0 | 2026-07-13 | Initial guide, covers `bounty_leadgen_agent.py` |
+| 1.0 | 2026-07-13 | Initial build, two-file implementation (agent.py + bounty_leadgen_agent.py) |
+| 2.0 | 2026-07-14 | UI redesign (3D Hyperrealism), added test_ui.py (31 AppTest tests), renamed to documentation
 
 ---
 
@@ -118,18 +119,19 @@ graph TD
 
 ## 6. Folder Structure
 
-**Current (demo).** The core logic lives in a separate `agent.py` module so the pure functions (`score_lead`, `draft_outreach`) and mock data (`MOCK_COMPANIES`) can be imported and tested independently of the Streamlit UI layer. The main entrypoint remains `bounty_leadgen_agent.py`, which adds the neumorphism CSS styling and handles the pipeline orchestration.
+**Current (demo).** The core logic lives in a separate `agent.py` module so the pure functions (`score_lead`, `draft_outreach`) and mock data (`MOCK_COMPANIES`) can be imported and tested independently of the Streamlit UI layer. The main entrypoint remains `bounty_leadgen_agent.py`, which adds the 3D Hyperrealism CSS styling and handles the pipeline orchestration.
 
 ```
-bounty_leadgen_agent.py   # Streamlit entrypoint — UI, CSS, orchestration (760 lines)
-agent.py                  # Core logic — scoring, outreach, mock data (101 lines)
-test_agent.py             # 35 unit & integration tests (347 lines)
-requirements.txt          # Pinned dependencies (streamlit, pandas)
-README.md                 # Project entry point (this file complements the guide)
-BUILD_GUIDE.md            # This document
+bounty_leadgen_agent.py   # Streamlit entrypoint — UI, CSS, orchestration
+agent.py                  # Core logic — scoring, outreach, mock data
+test_agent.py             # 35 unit & integration tests for agent.py
+test_ui.py                # 31 Streamlit UI tests using AppTest
+requirements.txt          # Pinned dependencies (streamlit, pandas, pytest)
+README.md                 # Project entry point
+documentation.md          # This document
 ```
 
-The split was motivated by testability: `agent.py`'s functions are pure with no Streamlit or IO dependencies, making them importable and testable in a standard `pytest` run without a Streamlit runtime. The 35 tests in `test_agent.py` cover all scoring edge cases, outreach variants, and a full-pipeline integration check.
+The split was motivated by testability: `agent.py`'s functions are pure with no Streamlit or IO dependencies, making them importable and testable in a standard `pytest` run without a Streamlit runtime. The 35 tests in `test_agent.py` cover all scoring edge cases, outreach variants, and a full-pipeline integration check. The UI layer has its own test suite (`test_ui.py`) with 31 AppTest tests covering page load, default run, partial pass, criteria interaction, and error handling — the presentation layer is tested independently of the domain logic.
 
 **Target production structure**, for when this graduates past a demo:
 
@@ -186,7 +188,7 @@ VS Code: the Python extension is the only one actually needed; it picks up the v
 | Technology | Why chosen | Alternative considered | Tradeoff |
 |---|---|---|---|
 | Python | Fastest path to a working agent demo; ecosystem fit for future ML scoring | Node/TypeScript | Python has better data/ML library support if scoring later becomes model-based |
-| Streamlit + Neumorphism CSS | Streamlit provides the runtime shell; ~500 lines of inlined neumorphism CSS provide a polished, production-adjacent visual design (embossed cards, inset inputs, pill-shaped buttons, press effects). | React + Flask API | Streamlit's widget model limits custom layout control, but the CSS layer is enough to make the live demo feel intentional. If full UI control were needed, the tradeoff would shift toward a proper front-end framework. |
+| Streamlit + 3D Hyperrealism CSS | Streamlit provides the runtime shell; ~500 lines of inlined 3D Hyperrealism CSS provide a polished, production-adjacent visual design (brushed titanium buttons with shimmer, carbon fiber inset inputs, optical glass panels with backdrop blur, cinematic lens flare and vignette lighting, physics-based spring animations). | React + Flask API | Streamlit's widget model limits custom layout control, but the CSS layer is enough to make the live demo feel intentional. If full UI control were needed, the tradeoff would shift toward a proper front-end framework. |
 | Pandas | Clean tabular rendering of the scoring table | Plain dicts + manual HTML | Pandas' `st.dataframe` integration is free with Streamlit |
 | Mock data (in-process list of dicts) | Deterministic, offline, no API keys needed live on a call | Real prospecting API (Apollo, Clay) | Real data adds network dependency and unpredictability during a live demo; explicitly deferred to Section 18 |
 
@@ -338,7 +340,7 @@ Streamlit's rerun model is why the code has no explicit state management: every 
 
 ## 18. Source Code Walkthrough
 
-The code spans two modules totaling **861 lines of Python**, plus **~500 lines of neumorphism CSS** inlined in the Streamlit page config.
+The code spans three modules totaling **~101 lines of domain logic** in `agent.py`, **~800 lines of UI** in `bounty_leadgen_agent.py` (including ~500 lines of 3D Hyperrealism CSS), **~347 lines** of agent tests in `test_agent.py`, and **~220 lines** of UI tests in `test_ui.py`.
 
 ### `agent.py` (101 lines) — three logical sections:
 
@@ -346,11 +348,19 @@ The code spans two modules totaling **861 lines of Python**, plus **~500 lines o
 2. **`score_lead(company, criteria)`** — pure function, O(1) per call (fixed 4 checks), returns `(float, dict)`. No exceptions raised; malformed criteria (e.g., missing key) would raise `KeyError` — acceptable for a demo, worth hardening with `.get()` defaults in production.
 3. **`draft_outreach(company)`** — pure function, string formatting only, O(1).
 
-### `bounty_leadgen_agent.py` (760 lines) — three logical sections:
+### `bounty_leadgen_agent.py` (~800 lines) — three logical sections:
 
-1. **Neumorphism CSS** (~500 lines) — inlined `st.markdown` block with a full neumorphic design system: embossed cards, inset input fields, pill-shaped buttons with multi-layer shadows and tactile press effects, custom scrollbars, and a monochromatic blue-gray palette. Every Streamlit widget type is overridden globally — selectboxes, text inputs, number inputs, sliders, dataframes, expanders, alerts, spinners, code blocks.
+1. **3D Hyperrealism CSS** (~500 lines) — inlined `st.markdown` block with a full industrial design system: brushed titanium buttons with shimmer animation, carbon fiber inset inputs, optical glass panels with `backdrop-filter: blur()`, cinematic vignette and lens flare overlay, etched gradient dividers, and physics-based spring-up animations. Palette: Gunmetal Grey, Silver, with Cyan accent glows. Every Streamlit widget type is overridden globally — selectboxes, text inputs, number inputs, sliders, dataframes, expanders, alerts, spinners, code blocks.
 2. **Imports and page config** — imports `MOCK_COMPANIES`, `score_lead`, `draft_outreach` from `agent.py`; sets `st.set_page_config(layout="wide")`.
 3. **UI script body** — linear: intake widgets → `run` button → prospecting loop → `score_lead` per company → sort/filter → render table → shortlist loop → `draft_outreach` + evidence render → verdict computation → render. Identical in structure and pipeline order to the single-file version — extracting the domain logic into `agent.py` didn't change the pipeline, only where the functions live.
+
+### `test_ui.py` (~220 lines) — 31 tests across 5 test classes:
+
+1. **`TestPageLoad`** (10 tests) — title, subtitle, all 5 widgets present, run button, info message before run.
+2. **`TestDefaultRun`** (13 tests) — default values, click produces scoring table, all 5 step headers appear, PASS verdict, evidence expanders.
+3. **`TestPartialPass`** (2 tests) — strict criteria (SaaS + 0.8 threshold) produces PARTIAL verdict and shortfall warning.
+4. **`TestCriteriaInteraction`** (3 tests) — industry filter narrows results, signal keyword changes outcomes, increasing leads requested still renders.
+5. **`TestErrorHandling`** (3 tests) — empty signal keyword, extreme headcount range, zero min confidence all render without crashing.
 
 The one place self-grading risk actually lives in this version: the verdict computation (`len(qualified) >= quantity`) runs in the same script, immediately after scoring, using the same `qualified` list scoring produced. There is no re-derivation from independent evidence — that's the honest gap between this demo and Section 15's description of a real oracle, and worth naming directly if someone on the call asks "so where's the actual independent verification?"
 
@@ -484,10 +494,12 @@ streamlit run bounty_leadgen_agent.py --server.headless true --server.port 8600 
 
 **Directory tree (current demo):**
 ```
-agent.py
-bounty_leadgen_agent.py
-test_agent.py
-requirements.txt
-README.md
-BUILD_GUIDE.md
+agent.py                  # Core logic — scoring, outreach, mock data
+bounty_leadgen_agent.py   # Streamlit entrypoint — UI, CSS, orchestration
+test_agent.py             # 35 unit & integration tests for agent.py
+test_ui.py                # 31 Streamlit UI tests using AppTest
+requirements.txt          # Pinned dependencies
+README.md                 # Project entry point
+documentation.md          # This document
+.gitignore                # Git ignore rules
 ```

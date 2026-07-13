@@ -778,7 +778,7 @@ if run:
         'border-top: 1px solid var(--glass-edge); padding-top: 0.5rem;">'
         'Note: In this demo the verifier still relies on the scorer\'s output rather than '
         're-deriving from raw evidence independently. A real production oracle would run as a '
-        'separate service with its own data access path — see Section 15 of the build guide.'
+        'separate service with its own data access path — see Section 15 of the documentation.'
         '</p>'
         '</div>',
         unsafe_allow_html=True,
