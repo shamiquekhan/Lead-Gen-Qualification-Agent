@@ -1,0 +1,6 @@
+# Verified Lead-Gen & Qualification Agent
+# Run: pip install -r requirements.txt
+# Then: streamlit run bounty_leadgen_agent.py
+
+streamlit==1.59.2
+pandas==3.0.3
