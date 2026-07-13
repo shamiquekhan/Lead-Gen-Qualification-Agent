@@ -138,7 +138,11 @@ st.markdown("""
     }
 
     /* ── Typography ── */
-    h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stText,
+    /* NOTE: span and label are intentionally excluded from this selector to avoid
+       breaking Streamlit's icon fonts (Material Symbols Rounded, etc.) which rely
+       on font inheritance. The expander arrow bug was caused by this exact pattern.
+       Widget labels are covered by their own specific rules below. */
+    h1, h2, h3, h4, h5, h6, p, .stMarkdown, .stText,
     .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         font-family: 'Chakra Petch', sans-serif !important;
         color: var(--text-primary);
