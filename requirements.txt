@@ -1,7 +1,10 @@
 # Verified Lead-Gen & Qualification Agent
 # Run: pip install -r requirements.txt
-# Then: streamlit run bounty_leadgen_agent.py
+# Then:
+#   streamlit run bounty_leadgen_agent.py   (mock-data demo)
+#   streamlit run lead_qualification_agent.py  (live Places API demo)
 
-streamlit==1.59.2
-pandas==3.0.3
-pytest==8.3.4
+streamlit>=1.28.0
+pandas>=2.0.0
+requests>=2.31.0
+pytest>=8.0.0

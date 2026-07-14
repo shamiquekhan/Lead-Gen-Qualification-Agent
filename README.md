@@ -3,8 +3,7 @@
 **A reference implementation of an outcome-based AI marketplace agent**, built to demonstrate [Bounty](https://trybounty.ai)'s "pay for verified outcomes, not AI outputs" model.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/streamlit-1.59.2-red)](https://streamlit.io)
-[![Tests](https://img.shields.io/badge/tests-35%20passing-brightgreen)](test_agent.py)
+[![Tests](https://img.shields.io/badge/tests-124%20passing-brightgreen)](test_agent.py)
 
 ---
 
@@ -16,97 +15,70 @@ This project demonstrates an alternative: **every lead carries an auditable evid
 
 The scoring table is shown **before** filtering (rejects included), and the verdict is willing to report **partial pass** rather than silently inflating results.
 
-## Quick Start
+## Two Demos
+
+| Demo | File | Data source | Requires API key |
+|------|------|-------------|-----------------|
+| **Mock pool** | `bounty_leadgen_agent.py` | 12 in-memory companies | No — works offline |
+| **Live Places** | `lead_qualification_agent.py` | Google Places API + SerpAPI fallback | Google optional, SerpAPI prefilled |
+
+### Mock demo (no setup, works offline)
 
 ```bash
-# Clone and enter
-git clone https://github.com/shamiquekhan/Lead-Gen-Qualification-Agent.git
-cd Lead-Gen-Qualification-Agent
-
-# Set up environment
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install streamlit pandas pytest
-
-# Run the app
+pip install -r requirements.txt
 streamlit run bounty_leadgen_agent.py
 ```
 
-Then open **http://localhost:8501** in your browser. Set your acceptance criteria and click **Run bounty**.
+### Live Places demo (dual backend)
+
+The app tries **Google Places API** first. If it fails or no Google key is given, it falls back to **SerpAPI** (prefilled with a demo key).
+
+1. Google Cloud Console → enable **Places API (New)** → create an API key (optional)
+2. Paste the Google key into the app, or leave blank to use SerpAPI
+   ```bash
+   streamlit run lead_qualification_agent.py
+   ```
 
 ### Run the tests
 
 ```bash
-python -m pytest test_agent.py -v
+python -m pytest test_agent.py test_ui.py test_lqa_agent.py test_lqa_ui.py -v
 ```
 
-All 35 tests should pass.
+All tests should pass.
 
 ## Project Structure
 
-```
-agent.py                  # Core logic — scoring, outreach, mock data (101 lines)
-bounty_leadgen_agent.py   # Streamlit entrypoint — UI, 3D Hyperrealism CSS, orchestration
-test_agent.py             # 35 unit & integration tests for agent.py
-test_ui.py                # 31 Streamlit UI tests using AppTest
-requirements.txt          # Pinned dependencies (streamlit, pandas, pytest)
-documentation.md          # Full documentation (this is the primary reference)
-README.md                 # This file
-```
-
-**Why two files?** `agent.py` contains only pure functions (`score_lead`, `draft_outreach`) and the mock data (`MOCK_COMPANIES`) — no Streamlit or IO dependencies. This makes it importable and testable in a standard `pytest` run without a Streamlit runtime. The UI layer lives in `bounty_leadgen_agent.py`, which adds ~500 lines of inlined 3D Hyperrealism CSS (brushed titanium, carbon fiber, optical glass) for the visual design.
+| File | Purpose |
+|------|---------|
+| `agent.py` | Core logic for mock demo — `score_lead`, `draft_outreach`, `MOCK_COMPANIES` |
+| `bounty_leadgen_agent.py` | Streamlit UI for mock demo (3D Hyperrealism CSS) |
+| `lqa_agent.py` | Core logic for Places API demo — dual-backend `search_places` (Google + SerpAPI), `normalize_place`, `score_lead`, `draft_outreach` |
+| `lead_qualification_agent.py` | Streamlit UI for Places API demo (both API key inputs, backend label) |
+| `test_agent.py` | 35 unit tests for `agent.py` |
+| `test_ui.py` | 31 UI tests for `bounty_leadgen_agent.py` |
+| `test_lqa_agent.py` | 30 unit tests for `lqa_agent.py` |
+| `test_lqa_ui.py` | 24 UI tests for `lead_qualification_agent.py` |
+| `requirements.txt` | Dependencies |
+| `documentation.md` | Full documentation (27 sections) |
 
 ## How It Works
 
 ### Pipeline
 
 1. **Bounty intake** — Buyer sets acceptance criteria (industry, headcount range, signal keyword, quantity, minimum confidence)
-2. **Prospecting** — Agent scans the candidate pool (currently 12 mock companies; replace with a real API in production)
-3. **Qualification scoring** — Each company is scored against the criteria using 4 weighted checks:
-
-   | Check | Weight | Logic |
-   |---|---|---|
-   | Industry | 0.3 | Exact match, or always pass if "Any" |
-   | Headcount | 0.2 | Within selected range |
-   | Signal | 0.4 | Case-insensitive keyword match in recent activity |
-   | Contact | 0.1 | Contact info found (not "unknown") |
-
+2. **Prospecting** — Agent scans the candidate pool (mock companies or live search via Google Places API + SerpAPI fallback)
+3. **Qualification scoring** — Each company is scored against the criteria using 4 weighted checks
 4. **Shortlist** — Companies above the confidence threshold are presented with outreach drafts
 5. **Verifier verdict** — PASS if the requested number of leads qualified; PARTIAL if fewer met the bar
 
 ### The evidence package
 
-Every qualified lead ships with a per-field evidence record that an independent verifier could re-check:
-
-```
-PASS  industry:  SaaS
-PASS  headcount: 85 employees
-PASS  signal:    Posted 3 AI/ML engineering roles in the last 30 days
-PASS  contact:   Priya Menon, Head of Growth
-```
-
-**Source:** northwindanalytics.com/careers
-
-This is what makes the outcome auditable — a buyer can confirm each claim without trusting the agent's self-report.
+Every qualified lead ships with a per-field evidence record that an independent verifier could re-check. This is what makes the outcome auditable — a buyer can confirm each claim without trusting the agent's self-report.
 
 ### Honest gap
 
 The current "verifier" re-uses the same `qualified` list that scoring produced, rather than re-deriving from raw evidence independently. A real production oracle would run as a **separate service** with its own data access path. See the [Documentation](documentation.md) for the full discussion (Section 15).
-
-## Technology Stack
-
-| Technology | Why |
-|---|---|
-| **Python** | Fastest path to a working demo; ecosystem fit for future ML scoring |
-| **Streamlit** + 500 lines of 3D Hyperrealism CSS | Zero front-end setup, polished visual design (brushed titanium, carbon fiber, optical glass, cinematic lighting) |
-| **Pandas** | Clean tabular rendering of the scoring table |
-| **Mock data** (12 dicts) | Deterministic, offline, zero API keys needed — swap for a real prospecting API later |
-
-## Documentation
-
-The **[Documentation](documentation.md)** is the primary reference — 27 sections covering everything from product philosophy to production upgrade paths, security, testing strategy, and a full FAQ. This README is just the entry point.
 
 ## Author
 

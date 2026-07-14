@@ -8,9 +8,11 @@
 **Status:** Demo-grade, three-module Streamlit implementation (domain logic in `agent.py`, UI/orchestration in `bounty_leadgen_agent.py`, tests in `test_agent.py` + `test_ui.py`). Production upgrade path in Section 19.
 
 | Version | Date | Change |
-|---|---|---|
+|---|---|---|---|
 | 1.0 | 2026-07-13 | Initial build, two-file implementation (agent.py + bounty_leadgen_agent.py) |
-| 2.0 | 2026-07-14 | UI redesign (3D Hyperrealism), added test_ui.py (31 AppTest tests), renamed to documentation
+| 2.0 | 2026-07-14 | UI redesign (3D Hyperrealism), added test_ui.py (31 AppTest tests), renamed to documentation |
+| 2.1 | 2026-07-14 | Added Places API variant (lead_qualification_agent.py + lqa_agent.py + test_lqa_agent.py + test_lqa_ui.py), merged requirements
+| 2.2 | 2026-07-14 | SerpAPI fallback backend; `search_places` returns `(results, backend_name)` tuple; backend name shown in UI |
 
 ---
 
@@ -132,6 +134,21 @@ documentation.md          # This document
 ```
 
 The split was motivated by testability: `agent.py`'s functions are pure with no Streamlit or IO dependencies, making them importable and testable in a standard `pytest` run without a Streamlit runtime. The 35 tests in `test_agent.py` cover all scoring edge cases, outreach variants, and a full-pipeline integration check. The UI layer has its own test suite (`test_ui.py`) with 31 AppTest tests covering page load, default run, partial pass, criteria interaction, and error handling — the presentation layer is tested independently of the domain logic.
+
+### Places API variant (v2.1+)
+
+The same architecture was replicated for live Google Places data with **dual-backend support**:
+
+```
+lqa_agent.py                  # Core logic — dual-backend search_places (Google + SerpAPI), normalize_place, score_lead, draft_outreach
+lead_qualification_agent.py   # Streamlit entrypoint — UI + orchestration, two API key inputs
+test_lqa_agent.py             # 30 unit tests for lqa_agent.py
+test_lqa_ui.py                # 24 Streamlit UI tests for lead_qualification_agent.py
+```
+
+The Places API version follows the same module split (`lqa_agent.py`/`lead_qualification_agent.py`) as the mock version (`agent.py`/`bounty_leadgen_agent.py`), with different scoring fields (category relevance, phone, website, established presence) and a different outreach template. 
+
+**Dual backend dispatch:** `search_places()` tries Google Places API first if a Google key is provided. If Google fails or no Google key is given, it falls back to SerpAPI. The function returns `(results, backend_name)` so the UI can display which backend was used. The SerpAPI key is prefilled with a demo key for immediate use.
 
 **Target production structure**, for when this graduates past a demo:
 
