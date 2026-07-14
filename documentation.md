@@ -5,14 +5,13 @@
 **Author:** Shamique Khan
 **Version:** 2.0
 **Date:** 2026-07-14
-**Status:** Demo-grade, three-module Streamlit implementation (domain logic in `agent.py`, UI/orchestration in `bounty_leadgen_agent.py`, tests in `test_agent.py` + `test_ui.py`). Production upgrade path in Section 19.
+**Status:** Demo-grade Streamlit implementation. Core logic in `lqa_agent.py`, UI/orchestration in `lead_qualification_agent.py`. Dual-backend (Google Places API + SerpAPI). Production upgrade path in Section 19.
 
 | Version | Date | Change |
 |---|---|---|---|
-| 1.0 | 2026-07-13 | Initial build, two-file implementation (agent.py + bounty_leadgen_agent.py) |
-| 2.0 | 2026-07-14 | UI redesign (3D Hyperrealism), added test_ui.py (31 AppTest tests), renamed to documentation |
-| 2.1 | 2026-07-14 | Added Places API variant (lead_qualification_agent.py + lqa_agent.py + test_lqa_agent.py + test_lqa_ui.py), merged requirements
-| 2.2 | 2026-07-14 | SerpAPI fallback backend; `search_places` returns `(results, backend_name)` tuple; backend name shown in UI |
+| 2.1 | 2026-07-14 | Initial Places API release (lqa_agent.py + lead_qualification_agent.py + tests), merged requirements
+| 2.2 | 2026-07-14 | SerpAPI fallback backend; `search_places` returns `(results, backend_name)` tuple; backend name shown in UI
+| 3.0 | 2026-07-15 | Removed mock demo (agent.py, bounty_leadgen_agent.py, test_agent.py, test_ui.py); streamlined to live-only |
 
 ---
 
@@ -121,19 +120,19 @@ graph TD
 
 ## 6. Folder Structure
 
-**Current (demo).** The core logic lives in a separate `agent.py` module so the pure functions (`score_lead`, `draft_outreach`) and mock data (`MOCK_COMPANIES`) can be imported and tested independently of the Streamlit UI layer. The main entrypoint remains `bounty_leadgen_agent.py`, which adds the 3D Hyperrealism CSS styling and handles the pipeline orchestration.
+**Current (demo).** The core logic lives in a separate `lqa_agent.py` module so the pure functions (`search_places`, `normalize_place`, `score_lead`, `draft_outreach`) can be imported and tested independently of the Streamlit UI layer. The main entrypoint is `lead_qualification_agent.py`, which handles the UI and pipeline orchestration.
 
 ```
-bounty_leadgen_agent.py   # Streamlit entrypoint — UI, CSS, orchestration
-agent.py                  # Core logic — scoring, outreach, mock data
-test_agent.py             # 35 unit & integration tests for agent.py
-test_ui.py                # 31 Streamlit UI tests using AppTest
-requirements.txt          # Pinned dependencies (streamlit, pandas, pytest)
-README.md                 # Project entry point
-documentation.md          # This document
+lead_qualification_agent.py   # Streamlit entrypoint — UI, orchestration
+lqa_agent.py                  # Core logic — dual-backend search, scoring, outreach
+test_lqa_agent.py             # 30 unit & integration tests for lqa_agent.py
+test_lqa_ui.py                # 24 Streamlit UI tests using AppTest
+requirements.txt              # Pinned dependencies (streamlit, pandas, pytest)
+README.md                     # Project entry point
+documentation.md              # This document
 ```
 
-The split was motivated by testability: `agent.py`'s functions are pure with no Streamlit or IO dependencies, making them importable and testable in a standard `pytest` run without a Streamlit runtime. The 35 tests in `test_agent.py` cover all scoring edge cases, outreach variants, and a full-pipeline integration check. The UI layer has its own test suite (`test_ui.py`) with 31 AppTest tests covering page load, default run, partial pass, criteria interaction, and error handling — the presentation layer is tested independently of the domain logic.
+The split was motivated by testability: `lqa_agent.py`'s functions are pure with no Streamlit or IO dependencies, making them importable and testable in a standard `pytest` run without a Streamlit runtime. The 30 tests in `test_lqa_agent.py` cover scoring edge cases, outreach variants, dual-backend search, and fallback logic. The UI layer has its own test suite (`test_lqa_ui.py`) with 24 AppTest tests covering page load, Google path, SerpAPI path, fallback, and error handling — the presentation layer is tested independently of the domain logic.
 
 ### Places API variant (v2.1+)
 
@@ -146,9 +145,7 @@ test_lqa_agent.py             # 30 unit tests for lqa_agent.py
 test_lqa_ui.py                # 24 Streamlit UI tests for lead_qualification_agent.py
 ```
 
-The Places API version follows the same module split (`lqa_agent.py`/`lead_qualification_agent.py`) as the mock version (`agent.py`/`bounty_leadgen_agent.py`), with different scoring fields (category relevance, phone, website, established presence) and a different outreach template. 
-
-**Dual backend dispatch:** `search_places()` tries Google Places API first if a Google key is provided. If Google fails or no Google key is given, it falls back to SerpAPI. The function returns `(results, backend_name)` so the UI can display which backend was used. The SerpAPI key is prefilled with a demo key for immediate use.
+**Dual backend dispatch:** `search_places()` tries Google Places API first if a Google key is provided. If Google fails or no Google key is given, it falls back to SerpAPI. The function returns `(results, backend_name)` so the UI can display which backend was used. The SerpAPI key is read from the `SERPAPI_API_KEY` environment variable.
 
 **Target production structure**, for when this graduates past a demo:
 
@@ -189,12 +186,12 @@ Splitting `scoring.py` from `oracle.py` is the one non-negotiable move for produ
    ```
 4. Run it:
    ```bash
-   streamlit run bounty_leadgen_agent.py
+   streamlit run lead_qualification_agent.py
    ```
 5. Streamlit opens `http://localhost:8501` automatically. If it doesn't, open that URL manually.
 
 **Common mistakes**
-- Running `python bounty_leadgen_agent.py` directly instead of `streamlit run` — Streamlit apps aren't executed as plain scripts; the `streamlit` CLI wraps them in its own server process.
+- Running `python lead_qualification_agent.py` directly instead of `streamlit run` — Streamlit apps aren't executed as plain scripts; the `streamlit` CLI wraps them in its own server process.
 - Forgetting the venv is active in a new terminal tab (activate it again, or you'll get `ModuleNotFoundError: streamlit`).
 - Port conflicts if something else is on 8501 — pass `--server.port 8600` or similar.
 
@@ -207,9 +204,7 @@ VS Code: the Python extension is the only one actually needed; it picks up the v
 | Python | Fastest path to a working agent demo; ecosystem fit for future ML scoring | Node/TypeScript | Python has better data/ML library support if scoring later becomes model-based |
 | Streamlit + 3D Hyperrealism CSS | Streamlit provides the runtime shell; ~500 lines of inlined 3D Hyperrealism CSS provide a polished, production-adjacent visual design (brushed titanium buttons with shimmer, carbon fiber inset inputs, optical glass panels with backdrop blur, cinematic lens flare and vignette lighting, physics-based spring animations). | React + Flask API | Streamlit's widget model limits custom layout control, but the CSS layer is enough to make the live demo feel intentional. If full UI control were needed, the tradeoff would shift toward a proper front-end framework. |
 | Pandas | Clean tabular rendering of the scoring table | Plain dicts + manual HTML | Pandas' `st.dataframe` integration is free with Streamlit |
-| Mock data (in-process list of dicts) | Deterministic, offline, no API keys needed live on a call | Real prospecting API (Apollo, Clay) | Real data adds network dependency and unpredictability during a live demo; explicitly deferred to Section 18 |
-
-**Future integrations** (not in this version, listed for the roadmap): Apollo or Clay for prospecting/enrichment, an LLM (Anthropic/OpenAI) for outreach personalization instead of the current template, and a real verification service for the oracle layer.
+**Future integrations** (not in this version, listed for the roadmap): An LLM (Anthropic/OpenAI) for outreach personalization instead of the current template, and a real verification service for the oracle layer.
 
 ## 9. Building the Project From Zero
 
@@ -217,29 +212,29 @@ This section assumes an empty directory and walks to the working app.
 
 **Step 1 — scaffold**
 ```bash
-mkdir bounty-leadgen-demo && cd bounty-leadgen-demo
+mkdir lead-qualification-agent && cd lead-qualification-agent
 python3 -m venv .venv && source .venv/bin/activate
-pip install streamlit pandas
-touch agent.py bounty_leadgen_agent.py
+pip install streamlit pandas requests
+touch lqa_agent.py lead_qualification_agent.py
 ```
 
-**Step 2 — define the data model first.** Before writing any UI, decide what a "candidate" looks like. This project uses a flat dict per company: `name`, `industry`, `headcount`, `signal`, `contact`, `source`, `raised`. Writing the data model before the UI is deliberate — the evidence package and the scoring function both depend on this shape, and getting it right early avoids threading new fields through three layers later. See Section 11 for the full schema.
+**Step 2 — define the data model first.** Before writing any UI, decide what a "candidate" looks like. This project uses a flat dict per business: `name`, `address`, `types`, `rating`, `rating_count`, `phone`, `website`, `maps_url`, `place_id`. Writing the data model before the UI is deliberate — the evidence package and the scoring function both depend on this shape, and getting it right early avoids threading new fields through three layers later.
 
-**Step 3 — write the scoring function as a pure function.** `score_lead(company, criteria) -> (confidence: float, checks: dict)`. No side effects, no UI calls inside it. This is what makes it independently testable and what makes the "oracle" idea coherent — a verifier just needs to be able to call the same function (or an equivalent) and get the same answer, deterministically.
+**Step 3 — write the search function as a pure function.** `search_places(query, api_key, serp_key) -> (list[dict], backend_name)`. No side effects, no UI calls inside it. This is what makes it independently testable.
 
-**Step 4 — write the outreach generator.** A template function, not an LLM call, for this version. Keep it deterministic for the same reason as scoring: a live demo shouldn't depend on an external API being up.
+**Step 4 — write the scoring and outreach generators.** `score_lead(place, criteria) -> (confidence, checks)` and `draft_outreach(place, good_or_service) -> str`. Template-based, deterministic, no external API calls.
 
-**Step 5 — build the UI as a linear script.** Streamlit re-runs the whole script top to bottom on every interaction; the code is written accordingly, as a sequence: intake widgets → run button → prospecting → scoring table → shortlist → evidence expanders → verdict. There's no separate "controller" — the script order *is* the pipeline order, which keeps the demo narrative and the code structure identical (useful when walking someone through it live).
+**Step 5 — build the UI as a linear script.** Streamlit re-runs the whole script top to bottom on every interaction; the code is written accordingly, as a sequence: intake widgets → run button → prospecting → scoring table → shortlist → evidence expanders → verdict.
 
-**Step 6 — verify offline.** `python3 -m py_compile bounty_leadgen_agent.py` for a fast syntax check, then a headless smoke test:
+**Step 6 — verify offline.** `python3 -m py_compile lead_qualification_agent.py` for a fast syntax check, then a headless smoke test:
 ```bash
-streamlit run bounty_leadgen_agent.py --server.headless true --server.port 8600
+streamlit run lead_qualification_agent.py --server.headless true --server.port 8600
 ```
 confirms the app boots without runtime errors before you're relying on it live.
 
-## 10. Mock Prospecting Layer
+## 10. Prospecting Layer
 
-`MOCK_COMPANIES` is a hardcoded Python list of 12 company dicts standing in for a real prospecting/enrichment call. It exists so the demo has zero external dependencies — no API keys, no rate limits, no network flakiness on a call. It's also intentionally varied: some companies clearly match typical criteria (AI hiring signals, right headcount), some clearly don't (no digital signal, unknown contact), so that the scoring table and the partial-pass path both have something real to show rather than a suspiciously perfect 5-for-5.
+`search_places()` in `lqa_agent.py` is a dual-backend function that tries **Google Places API** first (using the Places API's `searchText` endpoint with a field mask), then falls back to **SerpAPI** (Google Local engine) if the Google call fails or no Google key is provided. SerpAPI results are mapped to the same response shape as Google Places via `_map_serp_to_google()`, so the scoring and evidence pipeline works identically regardless of backend. The function returns `(results, backend_name)` to let the UI display which source was used.
 
 **Production replacement path:** a `prospecting.py` module exposing a function with the same return shape — a list of dicts with the same keys — backed by a real source (Apollo/Clay for firmographic + contact data, a search API or job-board scraper for the `signal` field). Nothing downstream (`score_lead`, evidence, verdict) needs to change, because it only ever consumes the dict shape, never the mock list directly by name outside of Section 18's `for company in MOCK_COMPANIES` loop, which becomes `for company in prospect(criteria)`.
 
@@ -357,27 +352,31 @@ Streamlit's rerun model is why the code has no explicit state management: every 
 
 ## 18. Source Code Walkthrough
 
-The code spans three modules totaling **~101 lines of domain logic** in `agent.py`, **~800 lines of UI** in `bounty_leadgen_agent.py` (including ~500 lines of 3D Hyperrealism CSS), **~347 lines** of agent tests in `test_agent.py`, and **~220 lines** of UI tests in `test_ui.py`.
+The code spans two core modules: **~230 lines of domain logic** in `lqa_agent.py` and **~165 lines of UI** in `lead_qualification_agent.py`, plus **~30 unit tests** in `test_lqa_agent.py` and **~24 UI tests** in `test_lqa_ui.py`.
 
-### `agent.py` (101 lines) — three logical sections:
+### `lqa_agent.py` — six functional sections:
 
-1. **`MOCK_COMPANIES`** — static data, 12 company dicts, see Section 10/11.
-2. **`score_lead(company, criteria)`** — pure function, O(1) per call (fixed 4 checks), returns `(float, dict)`. No exceptions raised; malformed criteria (e.g., missing key) would raise `KeyError` — acceptable for a demo, worth hardening with `.get()` defaults in production.
-3. **`draft_outreach(company)`** — pure function, string formatting only, O(1).
+1. **Constants** — API endpoints (`PLACES_SEARCH_URL`, `SERPAPI_BASE`), field mask, `MAX_RESULTS_PER_CALL`.
+2. **`_search_google()`** — calls Places API `searchText` endpoint via `requests.post`. Raises `RuntimeError` on non-200. Returns raw places list.
+3. **`_search_serp()`** — calls SerpAPI Google Local engine via `requests.get`. Maps to Google-shaped response via `_map_serp_to_google()`. Raises `RuntimeError` on error.
+4. **`search_places()`** — dispatcher: tries Google first, falls back to SerpAPI. Returns `(list[dict], backend_name)` tuple.
+5. **`normalize_place()` / `score_lead()`** — normalizes raw API response to internal shape; scores against criteria (category relevance, phone, website, established presence).
+6. **`draft_outreach()`** — template-based outreach text generator.
 
-### `bounty_leadgen_agent.py` (~800 lines) — three logical sections:
+### `lead_qualification_agent.py` — linear Streamlit script:
 
-1. **3D Hyperrealism CSS** (~500 lines) — inlined `st.markdown` block with a full industrial design system: brushed titanium buttons with shimmer animation, carbon fiber inset inputs, optical glass panels with `backdrop-filter: blur()`, cinematic vignette and lens flare overlay, etched gradient dividers, and physics-based spring-up animations. Palette: Gunmetal Grey, Silver, with Cyan accent glows. Every Streamlit widget type is overridden globally — selectboxes, text inputs, number inputs, sliders, dataframes, expanders, alerts, spinners, code blocks.
-2. **Imports and page config** — imports `MOCK_COMPANIES`, `score_lead`, `draft_outreach` from `agent.py`; sets `st.set_page_config(layout="wide")`.
-3. **UI script body** — linear: intake widgets → `run` button → prospecting loop → `score_lead` per company → sort/filter → render table → shortlist loop → `draft_outreach` + evidence render → verdict computation → render. Identical in structure and pipeline order to the single-file version — extracting the domain logic into `agent.py` didn't change the pipeline, only where the functions live.
+1. **Sidebar** — two API key inputs (Google Places optional, SerpAPI from env var), search criteria (good/service, location), min confidence slider, quantity input.
+2. **Main panel** — run button, live prospecting with spinner, scoring table with all results, shortlist with expanders (outreach + evidence), verdict (PASS/PARTIAL).
 
-### `test_ui.py` (~220 lines) — 31 tests across 5 test classes:
+### `test_lqa_ui.py` — 24 tests across 7 test classes:
 
-1. **`TestPageLoad`** (10 tests) — title, subtitle, all 5 widgets present, run button, info message before run.
-2. **`TestDefaultRun`** (13 tests) — default values, click produces scoring table, all 5 step headers appear, PASS verdict, evidence expanders.
-3. **`TestPartialPass`** (2 tests) — strict criteria (SaaS + 0.8 threshold) produces PARTIAL verdict and shortfall warning.
-4. **`TestCriteriaInteraction`** (3 tests) — industry filter narrows results, signal keyword changes outcomes, increasing leads requested still renders.
-5. **`TestErrorHandling`** (3 tests) — empty signal keyword, extreme headcount range, zero min confidence all render without crashing.
+1. **`TestPageLoad`** (6 tests) — title, both key inputs, prefilled Serp key, run button, info message.
+2. **`TestSuccessfulRunGoogle`** (9 tests) — full Google pipeline: scoring table, all step headers, found count, columns, expanders, PASS verdict.
+3. **`TestEmptyResults`** (1 test) — zero results shows warning.
+4. **`TestNoApiKey`** (1 test) — both keys blank shows error.
+5. **`TestPartialVerdict`** (2 tests) — high bar produces PARTIAL and warning.
+6. **`TestSerpFallback`** (1 test) — Google fails, SerpAPI succeeds, correct backend label.
+7. **`TestSerpDirect`** (1 test) — SerpAPI only (no Google key).
 
 The one place self-grading risk actually lives in this version: the verdict computation (`len(qualified) >= quantity`) runs in the same script, immediately after scoring, using the same `qualified` list scoring produced. There is no re-derivation from independent evidence — that's the honest gap between this demo and Section 15's description of a real oracle, and worth naming directly if someone on the call asks "so where's the actual independent verification?"
 
@@ -385,7 +384,7 @@ The one place self-grading risk actually lives in this version: the verdict comp
 
 In rough priority order for turning this into something real:
 
-1. **Replace `MOCK_COMPANIES`** with a real prospecting call (Apollo/Clay + a search or job-board API for signal detection). Keep the return shape identical.
+1. **Upgrade prospecting sources** — add more backends (Apollo, Clay, Yelp Fusion) alongside Google Places and SerpAPI. Keep the return shape identical.
 2. **Extract `oracle.py` into a separate service or process** that receives only evidence packages, not the scorer's confidence number, and independently re-checks against criteria.
 3. **Add a database** (Postgres) for bounty records, criteria, and historical evidence — currently everything is ephemeral, lost on rerun.
 4. **Add authentication** (buyers vs. agents vs. verifiers as distinct roles with distinct permissions).
@@ -413,11 +412,11 @@ In rough priority order for turning this into something real:
 
 ## 22. Deployment
 
-**Local (recommended for the call):**
+**Local:**
 ```bash
-streamlit run bounty_leadgen_agent.py
+streamlit run lead_qualification_agent.py
 ```
-Local avoids any network dependency during the demo — deliberate, given the mock-data decision in Section 9.
+Requires network access for the Places API and SerpAPI calls.
 
 **Docker** (for later, once this leaves demo stage):
 ```dockerfile
@@ -426,14 +425,14 @@ WORKDIR /app
 COPY . .
 RUN pip install streamlit pandas
 EXPOSE 8501
-CMD ["streamlit", "run", "bounty_leadgen_agent.py", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "lead_qualification_agent.py", "--server.address=0.0.0.0"]
 ```
 
 **Hosted options**, roughly in order of setup effort: Streamlit Community Cloud (fastest, free tier, fine for a persistent shareable demo link) → Render/Railway (still simple, more control) → AWS/GCP/Azure (only worth it once this needs to sit behind real auth, a database, and other services from Section 19).
 
 ## 23. Future Roadmap
 
-**Short term:** externalize `MOCK_COMPANIES` to a JSON file (Section 6), extend the existing unit test suite in `test_agent.py` (currently 35 tests covering scoring, outreach, and integration — see Section 21), add an explicit "Fail" verdict state distinct from "Partial" (Section 15).
+**Short term:** add more search backends, extend the test suite, add an explicit "Fail" verdict state distinct from "Partial" (Section 15).
 
 **Medium term:** real prospecting integration, LLM-backed outreach grounded in evidence, `oracle.py` extracted as an independently callable module (not yet a separate service).
 
@@ -444,11 +443,8 @@ CMD ["streamlit", "run", "bounty_leadgen_agent.py", "--server.address=0.0.0.0"]
 **Q: Why is the oracle just a re-run of the same function instead of something independent?**
 Because building a genuinely independent verification service was out of scope for a one-day demo. Section 15 says this directly — it's the most important limitation to be upfront about, not the thing to oversell.
 
-**Q: Why mock data instead of a live API for the demo?**
-Reliability on a call matters more than realism for this specific presentation. A network hiccup mid-demo costs more credibility than admitting the data is seeded.
-
-**Q: Why doesn't the default criteria set produce a partial pass?**
-It did in an earlier version of the mock data. With the current pool, the defaults produce a clean pass (5 of 5). The partial-pass behavior is demonstrated by tightening criteria during the demo — for example, setting Industry to "SaaS" and raising the minimum confidence slider to 0.8, which drops Pinecrest Insurance (confidence 0.7) from the shortlist and produces 4 of 5 qualified (partial pass). This is deliberate: the behavior is still present and visible, just not on the very first click.
+**Q: Why live APIs instead of mock data?**
+The live search demonstrates the dual-backend dispatch (Google Places → SerpAPI fallback) with real business data. Partial-pass behavior is demonstrated by raising the minimum confidence threshold, which drops lower-scoring businesses from the shortlist.
 
 **Q: Could the scoring weights be gamed by a dishonest agent to inflate confidence?**
 In this version, yes — nothing stops the scoring function itself from being written to always return true. That's exactly why Section 15 insists a real oracle can't share code or data path with the scorer.
@@ -499,11 +495,11 @@ The scoring table is shown *before* filtering, including the rejects, and the ve
 **Useful commands**
 ```bash
 python3 -m py_compile bounty_leadgen_agent.py         # fast syntax check
-streamlit run bounty_leadgen_agent.py                  # run locally
-streamlit run bounty_leadgen_agent.py --server.headless true --server.port 8600  # headless smoke test
+streamlit run lead_qualification_agent.py                  # run locally
+streamlit run lead_qualification_agent.py --server.headless true --server.port 8600  # headless smoke test
 ```
 
-**Package versions used in this build:** `streamlit` (latest at build time), `pandas` (latest at build time) — pin exact versions in `requirements.txt` before any production deployment.
+**Package versions used in this build:** `streamlit` (latest at build time), `pandas`, `requests` — pin exact versions in `requirements.txt` before any production deployment.
 
 **References**
 - Streamlit docs: https://docs.streamlit.io
@@ -511,12 +507,12 @@ streamlit run bounty_leadgen_agent.py --server.headless true --server.port 8600 
 
 **Directory tree (current demo):**
 ```
-agent.py                  # Core logic — scoring, outreach, mock data
-bounty_leadgen_agent.py   # Streamlit entrypoint — UI, CSS, orchestration
-test_agent.py             # 35 unit & integration tests for agent.py
-test_ui.py                # 31 Streamlit UI tests using AppTest
-requirements.txt          # Pinned dependencies
-README.md                 # Project entry point
-documentation.md          # This document
-.gitignore                # Git ignore rules
+lqa_agent.py                  # Core logic — dual-backend search, scoring, outreach
+lead_qualification_agent.py   # Streamlit entrypoint — UI, orchestration
+test_lqa_agent.py             # 30 unit & integration tests for lqa_agent.py
+test_lqa_ui.py                # 24 Streamlit UI tests using AppTest
+requirements.txt              # Pinned dependencies
+README.md                     # Project entry point
+documentation.md              # This document
+.gitignore                    # Git ignore rules
 ```

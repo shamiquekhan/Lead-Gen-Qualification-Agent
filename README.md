@@ -1,9 +1,8 @@
-# Verified Lead-Gen & Qualification Agent
+# Lead Qualification Agent
 
 **A reference implementation of an outcome-based AI marketplace agent**, built to demonstrate [Bounty](https://trybounty.ai)'s "pay for verified outcomes, not AI outputs" model.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
-[![Tests](https://img.shields.io/badge/tests-124%20passing-brightgreen)](test_agent.py)
 
 ---
 
@@ -15,61 +14,44 @@ This project demonstrates an alternative: **every lead carries an auditable evid
 
 The scoring table is shown **before** filtering (rejects included), and the verdict is willing to report **partial pass** rather than silently inflating results.
 
-## Two Demos
+## Live Places demo (dual backend)
 
-| Demo | File | Data source | Requires API key |
-|------|------|-------------|-----------------|
-| **Mock pool** | `bounty_leadgen_agent.py` | 12 in-memory companies | No — works offline |
-| **Live Places** | `lead_qualification_agent.py` | Google Places API + SerpAPI fallback | Google optional, SerpAPI prefilled |
-
-### Mock demo (no setup, works offline)
+The app tries **Google Places API** first. If it fails or no Google key is given, it falls back to **SerpAPI** (set via `SERPAPI_API_KEY` env var).
 
 ```bash
 pip install -r requirements.txt
-streamlit run bounty_leadgen_agent.py
+streamlit run lead_qualification_agent.py
 ```
 
-### Live Places demo (dual backend)
-
-The app tries **Google Places API** first. If it fails or no Google key is given, it falls back to **SerpAPI** (prefilled with a demo key).
-
-1. Google Cloud Console → enable **Places API (New)** → create an API key (optional)
-2. Paste the Google key into the app, or leave blank to use SerpAPI
-   ```bash
-   streamlit run lead_qualification_agent.py
-   ```
+Set API keys via environment variables or the UI inputs:
+- `GOOGLE_PLACES_API_KEY` — optional, enables Google Places API
+- `SERPAPI_API_KEY` — fallback backend
 
 ### Run the tests
 
 ```bash
-python -m pytest test_agent.py test_ui.py test_lqa_agent.py test_lqa_ui.py -v
+python -m pytest test_lqa_agent.py test_lqa_ui.py -v
 ```
-
-All tests should pass.
 
 ## Project Structure
 
 | File | Purpose |
 |------|---------|
-| `agent.py` | Core logic for mock demo — `score_lead`, `draft_outreach`, `MOCK_COMPANIES` |
-| `bounty_leadgen_agent.py` | Streamlit UI for mock demo (3D Hyperrealism CSS) |
-| `lqa_agent.py` | Core logic for Places API demo — dual-backend `search_places` (Google + SerpAPI), `normalize_place`, `score_lead`, `draft_outreach` |
-| `lead_qualification_agent.py` | Streamlit UI for Places API demo (both API key inputs, backend label) |
-| `test_agent.py` | 35 unit tests for `agent.py` |
-| `test_ui.py` | 31 UI tests for `bounty_leadgen_agent.py` |
+| `lqa_agent.py` | Core logic — dual-backend `search_places` (Google + SerpAPI), `normalize_place`, `score_lead`, `draft_outreach` |
+| `lead_qualification_agent.py` | Streamlit UI (both API key inputs, backend label) |
 | `test_lqa_agent.py` | 30 unit tests for `lqa_agent.py` |
 | `test_lqa_ui.py` | 24 UI tests for `lead_qualification_agent.py` |
 | `requirements.txt` | Dependencies |
-| `documentation.md` | Full documentation (27 sections) |
+| `documentation.md` | Full documentation |
 
 ## How It Works
 
 ### Pipeline
 
-1. **Bounty intake** — Buyer sets acceptance criteria (industry, headcount range, signal keyword, quantity, minimum confidence)
-2. **Prospecting** — Agent scans the candidate pool (mock companies or live search via Google Places API + SerpAPI fallback)
-3. **Qualification scoring** — Each company is scored against the criteria using 4 weighted checks
-4. **Shortlist** — Companies above the confidence threshold are presented with outreach drafts
+1. **Bounty intake** — Buyer sets acceptance criteria (good/service, location, minimum confidence, quantity)
+2. **Prospecting** — Agent searches live via Google Places API + SerpAPI fallback
+3. **Qualification scoring** — Each business is scored against the criteria using 4 weighted checks
+4. **Shortlist** — Businesses above the confidence threshold are presented with outreach drafts
 5. **Verifier verdict** — PASS if the requested number of leads qualified; PARTIAL if fewer met the bar
 
 ### The evidence package
@@ -78,7 +60,7 @@ Every qualified lead ships with a per-field evidence record that an independent 
 
 ### Honest gap
 
-The current "verifier" re-uses the same `qualified` list that scoring produced, rather than re-deriving from raw evidence independently. A real production oracle would run as a **separate service** with its own data access path. See the [Documentation](documentation.md) for the full discussion (Section 15).
+The current "verifier" re-uses the same `qualified` list that scoring produced, rather than re-deriving from raw evidence independently. A real production oracle would run as a **separate service** with its own data access path. See the [Documentation](documentation.md) for the full discussion.
 
 ## Author
 
