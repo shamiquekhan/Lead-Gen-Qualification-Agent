@@ -1,0 +1,41 @@
+# Light theme for Lead Qualification Agent
+# Palette follows the Streamlit theming reference: dark text on light
+# backgrounds (WCAG AA), primary dark enough for white button text.
+[theme]
+base = "light"
+primaryColor = "#0969da"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f6f8fa"
+codeBackgroundColor = "#f6f8fa"
+textColor = "#1F2328"
+linkColor = "#0969da"
+borderColor = "#d0d7de"
+showWidgetBorder = true
+showSidebarBorder = true
+baseRadius = "8px"
+buttonRadius = "8px"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+codeFontSize = "0.85rem"
+codeTextColor = "#1F2328"
+baseFontSize = 14
+baseFontWeight = 400
+linkUnderline = false
+
+# Semantic palette for status colors
+greenColor = "#1a7f37"
+redColor = "#cf222e"
+yellowColor = "#dbab09"
+orangeColor = "#bf8700"
+blueColor = "#0969da"
+grayColor = "#57606a"
+
+dataframeBorderColor = "#d0d7de"
+dataframeHeaderBackgroundColor = "#f6f8fa"
+
+[theme.sidebar]
+backgroundColor = "#f6f8fa"
+secondaryBackgroundColor = "#eaeef2"
+codeBackgroundColor = "#eaeef2"
+textColor = "#1F2328"
+borderColor = "#d0d7de"

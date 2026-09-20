@@ -7,6 +7,12 @@ Supports two backends:
 
 Both return the same normalized shape so the rest of the pipeline is
 backend-agnostic.
+
+Keys can come from the environment (SERPAPI_API_KEY / GOOGLE_PLACES_API_KEY,
+optionally via a .env file) or be pasted into the app.
+
+SerpAPI key health can be checked for free (not counted against quota) via
+the Account API: https://serpapi.com/account-api
 """
 
 import re
@@ -14,7 +20,11 @@ import requests
 
 PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
 SERPAPI_BASE = "https://serpapi.com/search"
+SERPAPI_ACCOUNT_URL = "https://serpapi.com/account"
 DEFAULT_TIMEOUT = 60
+
+# Masking helper: keys are shown in the UI as prefix + dots
+SERPAPI_KEY_PREFIX_MASK = 6
 
 FIELD_MASK = ",".join([
     "places.id",
@@ -136,6 +146,90 @@ def _search_serp(query: str, serp_key: str, max_results: int = 20, timeout: int 
 
     raw = data.get("local_results", [])
     return [_map_serp_to_google(r) for r in raw]
+
+
+# ---------------------------------------------------------------------------
+# SerpAPI key health check (Account API — free, not counted against quota)
+# ---------------------------------------------------------------------------
+
+def check_serp_key_health(serp_key: str, timeout: int = DEFAULT_TIMEOUT) -> dict:
+    """Validate a SerpAPI key and report remaining quota via the Account API.
+
+    The Account API is free of charge and does not consume search credits.
+    Returns a dict with:
+        ok           — True if the key is valid and has searches left
+        message      — human-readable status summary
+        valid_key    — key authenticated against an account
+        status       — account_status field (e.g. "Active")
+        searches_left— total_searches_left field (None if unknown)
+        plan_name    — plan_name field (None if unknown)
+        raw          — the full Account API payload
+    """
+    result = {
+        "ok": False,
+        "message": "",
+        "valid_key": False,
+        "status": None,
+        "searches_left": None,
+        "plan_name": None,
+        "raw": {},
+    }
+    try:
+        resp = requests.get(
+            SERPAPI_ACCOUNT_URL,
+            params={"api_key": serp_key},
+            timeout=timeout,
+        )
+    except requests.exceptions.Timeout as e:
+        result["message"] = f"Account API timed out after {timeout}s — try again."
+        return result
+    except requests.exceptions.RequestException as e:
+        result["message"] = f"Account API unreachable: {e}"
+        return result
+
+    if resp.status_code == 401:
+        result["message"] = "Invalid SerpAPI key (401 from Account API)."
+        return result
+    if resp.status_code != 200:
+        result["message"] = f"Account API error (HTTP {resp.status_code})."
+        return result
+
+    try:
+        info = resp.json()
+    except ValueError:
+        result["message"] = "Account API returned a non-JSON response."
+        return result
+
+    if "error" in info:
+        result["message"] = f"Account API error: {info['error']}"
+        return result
+
+    result["raw"] = info
+    result["valid_key"] = bool(info.get("account_id"))
+    result["status"] = info.get("account_status")
+    result["searches_left"] = info.get("total_searches_left")
+    result["plan_name"] = info.get("plan_name")
+
+    if not result["valid_key"]:
+        result["message"] = "Account API responded but no account was found for this key."
+        return result
+    if result["status"] and result["status"].lower() != "active":
+        result["message"] = f"Key valid but account status is '{result['status']}' — searches may fail."
+        return result
+    if isinstance(result["searches_left"], (int, float)) and result["searches_left"] <= 0:
+        result["message"] = (
+            f"Key valid but no searches left this month "
+            f"(plan: {result['plan_name'] or 'unknown'}). Upgrade or wait for renewal."
+        )
+        return result
+
+    masked = (serp_key[:SERPAPI_KEY_PREFIX_MASK] + "…") if len(serp_key) > SERPAPI_KEY_PREFIX_MASK else "key"
+    result["ok"] = True
+    result["message"] = (
+        f"Key {masked} valid — {result['searches_left']} searches left "
+        f"(plan: {result['plan_name'] or 'unknown'})."
+    )
+    return result
 
 
 # ---------------------------------------------------------------------------

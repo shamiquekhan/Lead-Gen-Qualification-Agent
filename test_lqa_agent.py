@@ -9,11 +9,13 @@ Run: python -m pytest test_lqa_agent.py -v
 
 import pytest
 from unittest import mock
+import requests
 from lqa_agent import (
     search_places,
     normalize_place,
     score_lead,
     draft_outreach,
+    check_serp_key_health,
     _parse_reviews,
     _map_serp_to_google,
 )
@@ -394,3 +396,131 @@ class TestSearchPlacesFallback:
         places, backend = search_places("q", api_key="gkey", serp_key="skey")
         assert places[0]["displayName"]["text"] == "Google Co"
         assert backend == "Google Places API"
+
+
+# ---------------------------------------------------------------------------
+# SerpAPI key health check (Account API)
+# ---------------------------------------------------------------------------
+
+class TestSerpKeyHealth:
+    def _account_payload(self, **overrides):
+        payload = {
+            "account_id": "abc123",
+            "account_email": "demo@serpapi.com",
+            "account_status": "Active",
+            "plan_name": "Freelancer Plan",
+            "total_searches_left": 5958,
+        }
+        payload.update(overrides)
+        return payload
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_healthy_key(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = self._account_payload()
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("valid-key-123")
+        assert result["ok"] is True
+        assert result["valid_key"] is True
+        assert result["status"] == "Active"
+        assert result["searches_left"] == 5958
+        assert result["plan_name"] == "Freelancer Plan"
+        assert "5958 searches left" in result["message"]
+        assert "valid-…" in result["message"]  # key masked in output (6-char prefix)
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_uses_account_endpoint(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = self._account_payload()
+        mock_get.return_value = mock_resp
+
+        check_serp_key_health("k")
+        args, kwargs = mock_get.call_args
+        assert args[0] == "https://serpapi.com/account"
+        assert kwargs["params"] == {"api_key": "k"}
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_invalid_key_401(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 401
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("bad-key")
+        assert result["ok"] is False
+        assert result["valid_key"] is False
+        assert "Invalid" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_http_error(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 500
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("k")
+        assert result["ok"] is False
+        assert "500" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_error_in_body(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {"error": "Invalid API key"}
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("k")
+        assert result["ok"] is False
+        assert "Invalid API key" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_exhausted_quota(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = self._account_payload(total_searches_left=0)
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("k")
+        assert result["ok"] is False
+        assert result["valid_key"] is True
+        assert "no searches left" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_inactive_account(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = self._account_payload(account_status="Cancelled")
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("k")
+        assert result["ok"] is False
+        assert result["valid_key"] is True
+        assert "Cancelled" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_timeout(self, mock_get):
+        mock_get.side_effect = requests.exceptions.Timeout("read timed out")
+
+        result = check_serp_key_health("k", timeout=5)
+        assert result["ok"] is False
+        assert "timed out" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_network_error(self, mock_get):
+        mock_get.side_effect = requests.ConnectionError("no route to host")
+
+        result = check_serp_key_health("k")
+        assert result["ok"] is False
+        assert "unreachable" in result["message"]
+
+    @mock.patch("lqa_agent.requests.get")
+    def test_non_json_response(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.side_effect = ValueError("not json")
+        mock_get.return_value = mock_resp
+
+        result = check_serp_key_health("k")
+        assert result["ok"] is False
+        assert "non-JSON" in result["message"]

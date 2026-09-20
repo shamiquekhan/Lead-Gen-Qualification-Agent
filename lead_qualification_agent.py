@@ -13,11 +13,14 @@ SETUP:
 - Google: cloud.google.com → enable "Places API (New)" → create API key
 - SerpAPI: serpapi.com → get API key (free tier: 100 searches/month)
 
+Keys are loaded automatically (in this order):
+1. A .env file in the project root (GOOGLE_PLACES_API_KEY=..., SERPAPI_API_KEY=...)
+2. Real environment variables
+3. Pasted into the app at runtime (overrides the above)
+
 Run:
     pip install -r requirements.txt
     streamlit run lead_qualification_agent.py
-
-Paste your key(s) into the app. Google is tried first; SerpAPI is the fallback.
 """
 
 import os
@@ -29,8 +32,35 @@ from lqa_agent import (
     normalize_place,
     score_lead,
     draft_outreach,
+    check_serp_key_health,
 )
 
+
+# ---------------------------------------------------------------------------
+# .env loading — simple parser, no extra dependency. Does not override
+# variables that are already set in the real environment.
+# ---------------------------------------------------------------------------
+
+def _load_dotenv(path: str = ".env") -> dict:
+    loaded = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                if key and value and key not in os.environ:
+                    os.environ[key] = value
+                    loaded[key] = value
+    except OSError:
+        pass
+    return loaded
+
+
+_loaded_env = _load_dotenv()
 
 st.set_page_config(page_title="Lead Qualification Agent — Live Data", layout="wide")
 
@@ -43,6 +73,10 @@ st.caption(
 
 api_key_default = os.environ.get("GOOGLE_PLACES_API_KEY", "")
 serp_key_default = os.environ.get("SERPAPI_API_KEY", "")
+
+if _loaded_env:
+    env_keys = ", ".join(sorted(_loaded_env))
+    st.info(f"Loaded from `.env`: {env_keys}", icon=":material/key:")
 
 c_key1, c_key2 = st.columns(2)
 with c_key1:
@@ -59,6 +93,37 @@ with c_key2:
         type="password",
         help="From serpapi.com. Used as fallback if no Google key or Google fails.",
     )
+
+# ---------------------------------------------------------------------------
+# Pre-flight SerpAPI key health check (Account API — free, no quota used)
+# ---------------------------------------------------------------------------
+
+with st.container(border=True):
+    check_col, button_col = st.columns([3, 1])
+    with check_col:
+        st.markdown("**Pre-flight key check**")
+        st.caption(
+            "Validates the SerpAPI key and reports remaining monthly quota "
+            "via the free Account API before you spend a search."
+        )
+    with button_col:
+        run_health_check = st.button(
+            "Check SerpAPI key",
+            help="Calls the SerpAPI Account API — free, does not use quota.",
+        )
+
+if run_health_check:
+    if not serp_key:
+        st.warning("No SerpAPI key to check — paste one above or set SERPAPI_API_KEY.")
+    else:
+        with st.spinner("Checking key with SerpAPI Account API..."):
+            health = check_serp_key_health(serp_key)
+        if health["ok"]:
+            st.success(health["message"])
+        elif health["valid_key"]:
+            st.warning(health["message"])
+        else:
+            st.error(health["message"])
 
 st.divider()
 st.subheader("1 . Search criteria")
@@ -123,7 +188,7 @@ if run:
         }
         for c, conf, checks in scored
     ])
-    st.dataframe(score_table, use_container_width=True, hide_index=True)
+    st.dataframe(score_table, width="stretch", hide_index=True)
 
     qualified = [(c, conf, checks) for c, conf, checks in scored if conf >= min_confidence][:quantity]
 

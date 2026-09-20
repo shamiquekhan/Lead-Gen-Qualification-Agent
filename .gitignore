@@ -10,7 +10,7 @@ build/
 .venv_check/
 
 # Streamlit
-.streamlit/
+.streamlit/secrets.toml
 
 # IDE
 .vscode/

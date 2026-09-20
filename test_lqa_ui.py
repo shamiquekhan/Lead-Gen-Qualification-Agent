@@ -8,6 +8,7 @@ Run: python -m pytest test_lqa_ui.py -v
 """
 
 from unittest import mock
+import os
 import pytest
 from streamlit.testing.v1 import AppTest
 
@@ -344,3 +345,75 @@ class TestMockCallVerification:
         assert mock_google.call_count >= 1
         call_body = mock_google.call_args[1]["json"]
         assert "textQuery" in call_body
+
+
+# ---------------------------------------------------------------------------
+# Pre-flight SerpAPI key health check
+# ---------------------------------------------------------------------------
+
+def _mock_account_response(payload: dict, status: int = 200):
+    resp = mock.MagicMock()
+    resp.status_code = status
+    resp.json.return_value = payload
+    return resp
+
+
+ACCOUNT_OK = {
+    "account_id": "abc123",
+    "account_email": "demo@serpapi.com",
+    "account_status": "Active",
+    "plan_name": "Freelancer Plan",
+    "total_searches_left": 5958,
+}
+
+
+class TestPreflightCheck:
+    def _click_check(self, at):
+        check_buttons = [b for b in at.button if "Check SerpAPI key" in b.label]
+        check_buttons[0].click().run()
+
+    def test_check_button_present(self):
+        at = build_app()
+        assert any("Check SerpAPI key" in b.label for b in at.button)
+
+    def test_no_key_warning(self):
+        at = build_app()
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
+        serp_inputs[0].set_value("").run()
+        self._click_check(at)
+        assert any("No SerpAPI key to check" in w.value for w in at.warning)
+
+    @mock.patch("requests.get")
+    def test_healthy_key_shows_success(self, mock_get):
+        mock_get.return_value = _mock_account_response(ACCOUNT_OK)
+        at = build_app()
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
+        serp_inputs[0].set_value("fake-serp-key").run()
+        self._click_check(at)
+        assert any("searches left" in s.value for s in at.success)
+
+    @mock.patch("requests.get")
+    def test_invalid_key_shows_error(self, mock_get):
+        mock_get.return_value = _mock_account_response({}, status=401)
+        at = build_app()
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
+        serp_inputs[0].set_value("bad-key").run()
+        self._click_check(at)
+        assert any("Invalid" in e.value for e in at.error)
+
+    @mock.patch("requests.get")
+    def test_exhausted_key_shows_warning(self, mock_get):
+        payload = dict(ACCOUNT_OK, total_searches_left=0)
+        mock_get.return_value = _mock_account_response(payload)
+        at = build_app()
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
+        serp_inputs[0].set_value("fake-serp-key").run()
+        self._click_check(at)
+        assert any("no searches left" in w.value for w in at.warning)
+
+    def test_env_var_prefills_serp_key(self):
+        at = AppTest.from_file("lead_qualification_agent.py", default_timeout=60)
+        with mock.patch.dict(os.environ, {"SERPAPI_API_KEY": "env-secret-key"}):
+            at.run()
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
+        assert serp_inputs[0].value == "env-secret-key"
