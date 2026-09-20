@@ -7,6 +7,7 @@ score_lead, draft_outreach. No live network calls.
 Run: python -m pytest test_lqa_agent.py -v
 """
 
+import os
 import pytest
 from unittest import mock
 import requests
@@ -16,6 +17,7 @@ from lqa_agent import (
     score_lead,
     draft_outreach,
     check_serp_key_health,
+    load_dotenv,
     _parse_reviews,
     _map_serp_to_google,
 )
@@ -524,3 +526,49 @@ class TestSerpKeyHealth:
         result = check_serp_key_health("k")
         assert result["ok"] is False
         assert "non-JSON" in result["message"]
+
+
+# ---------------------------------------------------------------------------
+# .env loading
+# ---------------------------------------------------------------------------
+
+class TestLoadDotenv:
+    def test_loads_and_normalizes_names(self, tmp_path, monkeypatch):
+        monkeypatch.delenv("SERPAPI_API_KEY", raising=False)
+        monkeypatch.delenv("GOOGLE_PLACES_API_KEY", raising=False)
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            '# comment\nserpapi_api_key="secret123"\nGOOGLE_PLACES_API_KEY=\n',
+            encoding="utf-8",
+        )
+
+        loaded = load_dotenv(str(env_file))
+
+        # lowercase name normalized, quoted value stripped, empty value skipped
+        assert loaded == {"SERPAPI_API_KEY": "secret123"}
+        assert os.environ["SERPAPI_API_KEY"] == "secret123"
+
+    def test_does_not_override_existing_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("SERPAPI_API_KEY", "from-real-env")
+        env_file = tmp_path / ".env"
+        env_file.write_text('SERPAPI_API_KEY="from-file"\n', encoding="utf-8")
+
+        loaded = load_dotenv(str(env_file))
+
+        assert loaded == {}
+        assert os.environ["SERPAPI_API_KEY"] == "from-real-env"
+
+    def test_missing_file_is_noop(self, tmp_path):
+        loaded = load_dotenv(str(tmp_path / "does-not-exist.env"))
+        assert loaded == {}
+
+    def test_single_quotes_stripped(self, tmp_path, monkeypatch):
+        monkeypatch.delenv("LQA_TEST_A", raising=False)
+        monkeypatch.delenv("LQA_TEST_B", raising=False)
+        env_file = tmp_path / ".env"
+        env_file.write_text('LQA_TEST_A="double"\nLQA_TEST_B=\'single\'\n', encoding="utf-8")
+
+        load_dotenv(str(env_file))
+
+        assert os.environ["LQA_TEST_A"] == "double"
+        assert os.environ["LQA_TEST_B"] == "single"

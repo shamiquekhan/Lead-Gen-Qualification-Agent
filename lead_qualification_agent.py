@@ -33,34 +33,15 @@ from lqa_agent import (
     score_lead,
     draft_outreach,
     check_serp_key_health,
+    load_dotenv,
 )
 
 
 # ---------------------------------------------------------------------------
-# .env loading — simple parser, no extra dependency. Does not override
-# variables that are already set in the real environment.
+# .env loading — from lqa_agent; real env vars always take precedence.
 # ---------------------------------------------------------------------------
 
-def _load_dotenv(path: str = ".env") -> dict:
-    loaded = {}
-    try:
-        with open(path, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                key, _, value = line.partition("=")
-                key = key.strip()
-                value = value.strip().strip('"').strip("'")
-                if key and value and key not in os.environ:
-                    os.environ[key] = value
-                    loaded[key] = value
-    except OSError:
-        pass
-    return loaded
-
-
-_loaded_env = _load_dotenv()
+_loaded_env = load_dotenv()
 
 st.set_page_config(page_title="Lead Qualification Agent — Live Data", layout="wide")
 

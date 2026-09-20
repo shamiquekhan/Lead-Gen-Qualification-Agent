@@ -15,6 +15,7 @@ SerpAPI key health can be checked for free (not counted against quota) via
 the Account API: https://serpapi.com/account-api
 """
 
+import os
 import re
 import requests
 
@@ -146,6 +147,40 @@ def _search_serp(query: str, serp_key: str, max_results: int = 20, timeout: int 
 
     raw = data.get("local_results", [])
     return [_map_serp_to_google(r) for r in raw]
+
+
+# ---------------------------------------------------------------------------
+# .env loading — simple parser, no extra dependency. Does not override
+# variables that are already set in the real environment. Variable names
+# are normalized to uppercase so `serpapi_api_key=...` also works.
+# ---------------------------------------------------------------------------
+
+def load_dotenv(path: str = ".env") -> dict:
+    """Load KEY=VALUE pairs from a .env file into os.environ.
+
+    - Names are uppercased (so lowercase .env lines still map to the
+      canonical GOOGLE_PLACES_API_KEY / SERPAPI_API_KEY names).
+    - Surrounding quotes on values are stripped.
+    - Existing environment variables are never overridden.
+    - Empty values and comment lines are skipped.
+    Returns a dict of the variables that were actually loaded.
+    """
+    loaded = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, value = line.partition("=")
+                key = key.strip().upper()
+                value = value.strip().strip('"').strip("'")
+                if key and value and key not in os.environ:
+                    os.environ[key] = value
+                    loaded[key] = value
+    except OSError:
+        pass
+    return loaded
 
 
 # ---------------------------------------------------------------------------
