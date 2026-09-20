@@ -148,11 +148,9 @@ class TestPageLoad:
         at = build_app()
         assert any("SerpAPI" in t.label for t in at.text_input)
 
-    def test_serp_key_prefilled(self):
+    def test_serp_key_input_present(self):
         at = build_app()
-        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
-        assert len(serp_inputs) >= 1
-        assert "1759bf70" in serp_inputs[0].value
+        assert any("SerpAPI" in t.label for t in at.text_input)
 
     def test_run_button_present(self):
         at = build_app()
@@ -295,7 +293,9 @@ class TestSerpFallback:
     def test_serp_results_when_google_fails(self, mock_google_fails_then_serp):
         at = build_app()
         google_inputs = [t for t in at.text_input if "Google Places" in t.label]
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
         google_inputs[0].set_value("bad-google-key").run()
+        serp_inputs[0].set_value("fake-serp-key").run()
         run_buttons = [b for b in at.button if "Run live search" in b.label]
         run_buttons[0].click().run()
         # Should still show results via SerpAPI fallback
@@ -321,6 +321,8 @@ class TestSerpDirect:
         mock_get.return_value = mock_resp
 
         at = build_app()
+        serp_inputs = [t for t in at.text_input if "SerpAPI" in t.label]
+        serp_inputs[0].set_value("fake-serp-key").run()
         # Leave Google key blank, use default Serp key
         run_buttons = [b for b in at.button if "Run live search" in b.label]
         run_buttons[0].click().run()

@@ -14,6 +14,7 @@ import requests
 
 PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
 SERPAPI_BASE = "https://serpapi.com/search"
+DEFAULT_TIMEOUT = 60
 
 FIELD_MASK = ",".join([
     "places.id",
@@ -35,14 +36,17 @@ MAX_RESULTS_PER_CALL = 20
 # Backend: Google Places API (New)
 # ---------------------------------------------------------------------------
 
-def _search_google(query: str, api_key: str, max_results: int = 20) -> list[dict]:
+def _search_google(query: str, api_key: str, max_results: int = 20, timeout: int = DEFAULT_TIMEOUT) -> list[dict]:
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": api_key,
         "X-Goog-FieldMask": FIELD_MASK,
     }
     body = {"textQuery": query, "maxResultCount": min(max_results, MAX_RESULTS_PER_CALL)}
-    resp = requests.post(PLACES_SEARCH_URL, headers=headers, json=body, timeout=15)
+    try:
+        resp = requests.post(PLACES_SEARCH_URL, headers=headers, json=body, timeout=timeout)
+    except requests.exceptions.Timeout as e:
+        raise RuntimeError(f"Google Places API request timed out after {timeout}s.") from e
     if resp.status_code != 200:
         try:
             detail = resp.json().get("error", {}).get("message", resp.text)
@@ -101,14 +105,24 @@ def _map_serp_to_google(r: dict) -> dict:
     }
 
 
-def _search_serp(query: str, serp_key: str, max_results: int = 20) -> list[dict]:
+def _search_serp(query: str, serp_key: str, max_results: int = 20, timeout: int = DEFAULT_TIMEOUT) -> list[dict]:
     params = {
         "engine": "google_local",
         "q": query,
         "api_key": serp_key,
         "num": min(max_results, MAX_RESULTS_PER_CALL),
     }
-    resp = requests.get(SERPAPI_BASE, params=params, timeout=15)
+    retries = 2
+    for attempt in range(retries):
+        try:
+            resp = requests.get(SERPAPI_BASE, params=params, timeout=timeout)
+            break
+        except requests.exceptions.Timeout as e:
+            if attempt == retries - 1:
+                raise RuntimeError(
+                    f"SerpAPI request timed out after {timeout}s. SerpAPI's upstream engine "
+                    f"is taking longer than expected. Please retry or provide a Google Places API key."
+                ) from e
     if resp.status_code != 200:
         try:
             detail = resp.json().get("error", resp.text)
@@ -133,6 +147,7 @@ def search_places(
     api_key: str = "",
     serp_key: str = "",
     max_results: int = 20,
+    timeout: int = DEFAULT_TIMEOUT,
 ) -> tuple[list[dict], str]:
     """Search for places. Tries Google Places API first if api_key given,
     then falls back to SerpAPI if serp_key given. Raises RuntimeError if
@@ -142,14 +157,14 @@ def search_places(
     errors = []
     if api_key:
         try:
-            return _search_google(query, api_key, max_results), "Google Places API"
+            return _search_google(query, api_key, max_results, timeout=timeout), "Google Places API"
         except Exception as e:
             errors.append(f"Google: {e}")
             if not serp_key:
                 raise
     if serp_key:
         try:
-            return _search_serp(query, serp_key, max_results), "SerpAPI (Google Local)"
+            return _search_serp(query, serp_key, max_results, timeout=timeout), "SerpAPI (Google Local)"
         except Exception as e:
             errors.append(f"SerpAPI: {e}")
             raise RuntimeError("; ".join(errors)) from e
